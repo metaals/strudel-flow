@@ -1,57 +1,24 @@
-import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
-import { Slider } from '@/components/ui/slider';
+import { createEffectSliderNode } from './effect-slider-node';
 
-export function GainNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-  const gain = data.gain ? parseFloat(data.gain) : 1;
+const formatGain = (gain: number) =>
+  `${gain.toFixed(1)}x ${gain > 1 ? `(+${(20 * Math.log10(gain)).toFixed(1)}dB)` : gain < 1 ? `(${(20 * Math.log10(gain)).toFixed(1)}dB)` : '(0dB)'}`;
 
-  // Handler for gain changes
-  const handleGainChange = (value: number[]) => {
-    updateNodeData(id, { gain: value[0].toString() });
-  };
+export const GainNode = createEffectSliderNode({
+  key: 'gain',
+  label: 'Gain',
+  min: 0.1,
+  max: 5,
+  step: 0.1,
+  defaultValue: 1,
+  formatValue: formatGain,
+});
 
-  return (
-    <WorkflowNode id={id} data={data}>
-      <div className="flex flex-col gap-3 p-4 bg-card text-card-foreground rounded-md min-w-80">
-        {/* Gain control */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium">Gain</label>
-            <span className="text-xs text-muted-foreground">
-              {gain.toFixed(1)}x{' '}
-              {gain > 1
-                ? `(+${(20 * Math.log10(gain)).toFixed(1)}dB)`
-                : gain < 1
-                ? `(${(20 * Math.log10(gain)).toFixed(1)}dB)`
-                : '(0dB)'}
-            </span>
-          </div>
-          <Slider
-            value={[gain]}
-            onValueChange={handleGainChange}
-            min={0.1}
-            max={5}
-            step={0.1}
-            className="w-full"
-          />
-        </div>
-      </div>
-    </WorkflowNode>
-  );
-}
-
-GainNode.strudelOutput = (node: AppNode, strudelString: string) => {
-  const gain = node.data.gain ? parseFloat(node.data.gain) : 1;
-  if (gain === 1) return strudelString;
-
-  const gainCall = `gain(${gain})`;
-  return strudelString ? `${strudelString}.${gainCall}` : gainCall;
-};
+import { gainOutput } from '@/lib/node-outputs/effects';
 
 export const gainNodeDef = {
   type: 'gain-node' as const,
   component: GainNode,
   config: { title: 'Gain', category: 'Audio Effects' as const, icon: 'Volume2' as const },
+  output: gainOutput,
+  defaults: { gain: '1' },
 };

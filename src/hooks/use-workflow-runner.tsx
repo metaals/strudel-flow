@@ -1,141 +1,64 @@
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
 import { useAppStore } from '@/store/app-store';
-import { generateOutput } from '@/lib/strudel';
-import { evaluate, hush } from '@strudel/web';
-import { logger } from '@/lib/logger';
+import { strudelEngine } from '@/lib/strudel-engine';
+import { useErrorStore } from '@/store/error-store';
+import { toast } from 'sonner';
 
 export function useWorkflowRunner() {
-  const isRunning = useRef(false);
-  const lastEvaluatedPattern = useRef<string>('');
-  const debounceTimerId = useRef<number | null>(null);
   const pattern = useStrudelStore((s) => s.pattern);
   const setPattern = useStrudelStore((s) => s.setPattern);
   const cpm = useStrudelStore((s) => s.cpm);
   const bpc = useStrudelStore((s) => s.bpc);
 
-  const nodes = useAppStore((state) => state.nodes);
-  const edges = useAppStore((state) => state.edges);
+  const nodes = useAppStore((s) => s.nodes);
+  const edges = useAppStore((s) => s.edges);
+  const nodesVersion = useAppStore((s) => s.nodesVersion);
+  const pushError = useErrorStore((s) => s.pushError);
+  const clearErrors = useErrorStore((s) => s.clearErrors);
 
-  const generatedPattern = useMemo(
-    () => generateOutput(nodes, edges, cpm, bpc),
-    [nodes, edges, cpm, bpc],
+  const generated = useMemo(
+    () => strudelEngine.generate(nodes, edges, cpm, bpc),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nodesVersion, edges, cpm, bpc]
   );
 
   useEffect(() => {
-    setPattern(generatedPattern);
-  }, [generatedPattern, setPattern]);
+    setPattern(generated.pattern);
+  }, [generated.pattern, setPattern]);
 
-  const getActivePattern = useCallback((p: string) => {
-    return p
-      .split('\n')
-      .filter((line) => !line.trim().startsWith('//'))
-      .join('\n');
-  }, []);
-
-  const evaluatePattern = useCallback(
-    (patternToEvaluate: string) => {
-      const activePattern = getActivePattern(patternToEvaluate);
-      const hasContent = activePattern
-        .replace(/setcpm\([^)]+\)\s*/g, '')
-        .trim();
-
-      if (!hasContent) {
-        if (isRunning.current) {
-          hush();
-          isRunning.current = false;
-        }
-        lastEvaluatedPattern.current = '';
-        return;
-      }
-
-      if (activePattern === lastEvaluatedPattern.current) return;
-
-      isRunning.current = true;
-      lastEvaluatedPattern.current = activePattern;
-
-      try {
-        evaluate(activePattern);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        const isKnownWarning =
-          errorMessage.includes('got "undefined" instead of pattern') ||
-          errorMessage.includes('Cannot read properties of undefined');
-
-        if (isKnownWarning) {
-          logger.pattern('Strudel pattern warning (suppressed):', errorMessage);
-        } else {
-          logger.error('Strudel evaluation error:', err);
-        }
-      }
-    },
-    [getActivePattern],
-  );
-
-  const debouncedEvaluate = useCallback(
-    (patternToEvaluate: string) => {
-      if (debounceTimerId.current !== null) {
-        window.clearTimeout(debounceTimerId.current);
-      }
-
-      // Tempo and scale changes evaluate immediately; everything else is debounced
-      if (
-        patternToEvaluate.includes('setcpm(') ||
-        patternToEvaluate.includes('scale(')
-      ) {
-        evaluatePattern(patternToEvaluate);
-        return;
-      }
-
-      debounceTimerId.current = window.setTimeout(() => {
-        evaluatePattern(patternToEvaluate);
-        debounceTimerId.current = null;
-      }, 50);
-    },
-    [evaluatePattern],
-  );
+  useEffect(() => {
+    if (generated.errors.length > 0) {
+      clearErrors();
+      generated.errors.forEach((e) => {
+        pushError(e);
+        toast.error(`Node ${e.type} error: ${e.message}`);
+      });
+    }
+  }, [generated.errors, pushError, clearErrors]);
 
   useEffect(() => {
     if (!pattern?.trim()) {
-      if (debounceTimerId.current !== null) {
-        window.clearTimeout(debounceTimerId.current);
-        debounceTimerId.current = null;
-      }
-      if (isRunning.current) {
-        hush();
-        isRunning.current = false;
-      }
-      lastEvaluatedPattern.current = '';
+      strudelEngine.stop();
       return;
     }
-
-    debouncedEvaluate(pattern);
-  }, [pattern, debouncedEvaluate]);
+    strudelEngine.debouncedEvaluate(pattern);
+  }, [pattern]);
 
   const forceEvaluate = useCallback(() => {
     const { nodes: currentNodes, edges: currentEdges } = useAppStore.getState();
     const { cpm: currentCpm, bpc: currentBpc } = useStrudelStore.getState();
-    const freshPattern = generateOutput(
-      currentNodes,
-      currentEdges,
-      currentCpm,
-      currentBpc,
-    );
-    evaluatePattern(freshPattern);
-  }, [evaluatePattern]);
+    strudelEngine.forceEvaluate(currentNodes, currentEdges, currentCpm, currentBpc);
+  }, []);
 
   return {
-    runWorkflow: () => debouncedEvaluate(pattern),
+    runWorkflow: () => strudelEngine.debouncedEvaluate(pattern),
     forceEvaluate,
-    stopWorkflow: () => {
-      if (debounceTimerId.current !== null) {
-        window.clearTimeout(debounceTimerId.current);
-        debounceTimerId.current = null;
-      }
-      isRunning.current = false;
-      lastEvaluatedPattern.current = '';
-      hush();
-    },
-    isRunning: () => isRunning.current,
+    stopWorkflow: () => strudelEngine.stop(),
+    isRunning: () => strudelEngine.getState().isRunning,
   };
+}
+
+export function useWorkflowRunnerDebug() {
+  return strudelEngine.getState();
 }

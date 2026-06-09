@@ -69,6 +69,14 @@ export function toggleCell(
     }
   } else {
     const newGrid = grid.map((row) => [...row]);
+    // Ensure row exists and has enough columns
+    while (newGrid.length <= stepIdx) {
+      newGrid.push(Array(8).fill(false));
+    }
+    if (!newGrid[stepIdx]) newGrid[stepIdx] = Array(8).fill(false);
+    while (newGrid[stepIdx].length <= noteIdx) {
+      newGrid[stepIdx].push(false);
+    }
     const wasOn = newGrid[stepIdx][noteIdx];
 
     const stepGroups = noteGroups[stepIdx] || [];

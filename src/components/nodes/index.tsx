@@ -1,9 +1,9 @@
 import { XYPosition } from '@xyflow/react';
 import { nanoid } from 'nanoid';
 
-import { nodesConfig, nodeTypes } from './registry';
+import { nodesConfig, nodeTypes, nodeDefaults } from './registry';
 
-export { nodesConfig, nodeTypes };
+export { nodesConfig, nodeTypes, nodeDefaults };
 export type { NodeCategory, NodeConfigEntry } from './registry';
 export type {
   WorkflowNodeData,
@@ -27,6 +27,7 @@ export function createNodeByType({
   data?: WorkflowNodeData;
 }): AppNode {
   const node = nodesConfig[type];
+  const defaults = nodeDefaults[type] || {};
 
   const newNode = {
     id: id ?? nanoid(),
@@ -36,6 +37,7 @@ export function createNodeByType({
       notes: node.notes,
       icon: node.icon,
       state: 'running',
+      ...defaults,
     },
     position: {
       x: position?.x || 0,

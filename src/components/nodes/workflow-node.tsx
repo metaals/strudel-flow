@@ -10,10 +10,6 @@ import {
 } from '@/components/node-header';
 import { WorkflowNodeData, AppNodeType } from '@/components/nodes/types';
 
-const INSTRUMENT_TYPES: Set<string> = new Set([
-  'pad-node', 'arpeggiator-node', 'chord-node',
-  'polyrhythm-node', 'beat-machine-node', 'custom-node',
-]);
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { iconMapping } from '@/data/icon-mapping';
 import { BaseNode } from '@/components/base-node';
@@ -23,6 +19,7 @@ const PatternPopup = lazy(() => import('@/components/pattern-popup'));
 import { BaseHandle } from '@/components/base-handle';
 import { Position } from '@xyflow/react';
 import { findConnectedComponents } from '@/lib/graph-utils';
+import { nodesConfig } from '@/components/nodes/registry';
 
 function WorkflowNode({
   id,
@@ -38,16 +35,16 @@ function WorkflowNode({
   const { forceEvaluate } = useWorkflowRunner();
   const [show, setShow] = useState(false);
 
-  const { removeNode, edges, nodes, updateNodeData } = useAppStore(
-    (state) => state
-  );
-  const nodeState = useAppStore((state) => state.nodes.find((n) => n.id === id))
-    ?.data?.state;
+  const removeNode = useAppStore((s) => s.removeNode);
+  const updateMany = useAppStore((s) => s.updateManyNodeData);
+  const edges = useAppStore((s) => s.edges);
+  const nodes = useAppStore((s) => s.nodes);
+  const nodeState = useAppStore((s) => s.nodes.find((n) => n.id === id)?.data?.state);
 
   const isPaused = nodeState === 'paused';
 
-  // Determine if this node is an instrument based on its type
-  const isInstrument = type ? INSTRUMENT_TYPES.has(type) : false;
+  // Determine if this node is an instrument based on registry category
+  const isInstrument = type ? nodesConfig[type]?.category === 'Instruments' : false;
 
   // Find all connected nodes for this group using findConnectedComponents
   const { connectedNodeIds } = useMemo(() => {
@@ -60,18 +57,14 @@ function WorkflowNode({
   }, [nodes, edges, id]);
 
   const onPlay = useCallback(() => {
-    connectedNodeIds.forEach((nodeId) => {
-      updateNodeData(nodeId, { state: 'running' });
-    });
+    updateMany(Array.from(connectedNodeIds), { state: 'running' });
     forceEvaluate();
-  }, [forceEvaluate, connectedNodeIds, updateNodeData]);
+  }, [forceEvaluate, connectedNodeIds, updateMany]);
 
   const onPause = useCallback(() => {
-    connectedNodeIds.forEach((nodeId) => {
-      updateNodeData(nodeId, { state: 'paused' });
-    });
+    updateMany(Array.from(connectedNodeIds), { state: 'paused' });
     forceEvaluate();
-  }, [forceEvaluate, connectedNodeIds, updateNodeData]);
+  }, [forceEvaluate, connectedNodeIds, updateMany]);
 
   const onDelete = useCallback(() => {
     removeNode(id);

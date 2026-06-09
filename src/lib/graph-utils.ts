@@ -1,40 +1,43 @@
 import { Edge } from '@xyflow/react';
 import { AppNode } from '@/components/nodes';
 
+export function buildAdjacencyMap(edges: Edge[]): Map<string, string[]> {
+  const adj = new Map<string, string[]>();
+  for (const edge of edges) {
+    if (!adj.has(edge.source)) adj.set(edge.source, []);
+    if (!adj.has(edge.target)) adj.set(edge.target, []);
+    adj.get(edge.source)!.push(edge.target);
+    adj.get(edge.target)!.push(edge.source);
+  }
+  return adj;
+}
+
 export function findConnectedComponents(
   nodes: AppNode[],
   edges: Edge[]
 ): string[][] {
+  const adj = buildAdjacencyMap(edges);
   const visited = new Set<string>();
   const components: string[][] = [];
 
-  nodes.forEach((node) => {
-    if (!visited.has(node.id)) {
-      const component: string[] = [];
-      dfs(node.id, visited, component, edges);
-      if (component.length > 0) {
-        components.push(component);
+  for (const node of nodes) {
+    if (visited.has(node.id)) continue;
+    const component: string[] = [];
+    const stack = [node.id];
+    visited.add(node.id);
+    while (stack.length) {
+      const current = stack.pop()!;
+      component.push(current);
+      const neighbors = adj.get(current) || [];
+      for (const nb of neighbors) {
+        if (!visited.has(nb)) {
+          visited.add(nb);
+          stack.push(nb);
+        }
       }
     }
-  });
+    if (component.length > 0) components.push(component);
+  }
 
   return components;
-}
-
-function dfs(
-  nodeId: string,
-  visited: Set<string>,
-  component: string[],
-  edges: Edge[]
-) {
-  visited.add(nodeId);
-  component.push(nodeId);
-
-  edges.forEach((edge) => {
-    if (edge.source === nodeId && !visited.has(edge.target)) {
-      dfs(edge.target, visited, component, edges);
-    } else if (edge.target === nodeId && !visited.has(edge.source)) {
-      dfs(edge.source, visited, component, edges);
-    }
-  });
 }

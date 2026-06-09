@@ -29,7 +29,12 @@ import { fmNodeDef } from './effects/fm-node';
 import { lateNodeDef } from './effects/late-node';
 import { adsrNodeDef } from './effects/adsr-node';
 
+import type { AppNode, WorkflowNodeData } from './types';
+import { NODE_DEFAULTS } from './data';
+
 export type NodeCategory = 'Instruments' | 'Synths' | 'Audio Effects' | 'Time Effects';
+
+export type NodeOutputFn = (node: AppNode, strudelString: string) => string;
 
 export type NodeDefinition = {
   type: string;
@@ -41,6 +46,8 @@ export type NodeDefinition = {
     sound?: string;
     notes?: string;
   };
+  output?: NodeOutputFn;
+  defaults?: Partial<WorkflowNodeData>;
 };
 
 const allNodeDefs: NodeDefinition[] = [
@@ -97,4 +104,12 @@ export const nodesConfig: Record<string, NodeConfigEntry> = Object.fromEntries(
 
 export const nodeTypes = Object.fromEntries(
   allNodeDefs.map((d) => [d.type, d.component])
+);
+
+export const nodeDefaults: Record<string, Partial<WorkflowNodeData>> = Object.fromEntries(
+  allNodeDefs.map((d) => [d.type, d.defaults ?? NODE_DEFAULTS[d.type as keyof typeof NODE_DEFAULTS] ?? {}])
+);
+
+export const nodeOutputs: Record<string, NodeOutputFn | undefined> = Object.fromEntries(
+  allNodeDefs.map((d) => [d.type, d.output])
 );

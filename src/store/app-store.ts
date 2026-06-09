@@ -14,11 +14,14 @@ import {
 import { AppNode } from '@/components/nodes';
 import { initialEdges, initialNodes } from '@/data/workflow-data';
 
+import type { WorkflowNodeData } from '@/components/nodes/types';
+
 export type AppState = {
   nodes: AppNode[];
   edges: Edge[];
   colorMode: ColorMode;
   theme: string;
+  nodesVersion: number;
 };
 
 export type AppActions = {
@@ -28,7 +31,8 @@ export type AppActions = {
   setNodes: (nodes: AppNode[]) => void;
   addNode: (node: AppNode) => void;
   removeNode: (nodeId: string) => void;
-  updateNodeData: (nodeId: string, updates: Record<string, unknown>) => void;
+  updateNodeData: (nodeId: string, updates: Partial<WorkflowNodeData>) => void;
+  updateManyNodeData: (nodeIds: string[], updates: Partial<WorkflowNodeData>) => void;
   setEdges: (edges: Edge[]) => void;
   onConnect: OnConnect;
   setTheme: (theme: string) => void;
@@ -43,30 +47,35 @@ export const useAppStore = create<AppStore>()(
     edges: initialEdges,
     colorMode: 'light',
     theme: 'supabase',
+    nodesVersion: 0,
 
     onNodesChange: async (changes) => {
-      set({ nodes: applyNodeChanges(changes, get().nodes) });
+      const hasDataChange = changes.some((c) => c.type !== 'position' && c.type !== 'select');
+      set({ nodes: applyNodeChanges(changes, get().nodes), nodesVersion: hasDataChange ? get().nodesVersion + 1 : get().nodesVersion });
     },
 
-    setNodes: (nodes) => set({ nodes }),
+    setNodes: (nodes) => set({ nodes, nodesVersion: get().nodesVersion + 1 }),
 
-    addNode: (node) => set({ nodes: [...get().nodes, node] }),
+    addNode: (node) => set({ nodes: [...get().nodes, node], nodesVersion: get().nodesVersion + 1 }),
 
     removeNode: (nodeId) =>
-      set({ nodes: get().nodes.filter((node) => node.id !== nodeId) }),
+      set({ nodes: get().nodes.filter((node) => node.id !== nodeId), nodesVersion: get().nodesVersion + 1 }),
 
-    setEdges: (edges) => set({ edges }),
+    setEdges: (edges) => set({ edges, nodesVersion: get().nodesVersion + 1 }),
 
     onEdgesChange: (changes) =>
-      set({ edges: applyEdgeChanges(changes, get().edges) }),
+      set({ edges: applyEdgeChanges(changes, get().edges), nodesVersion: get().nodesVersion + 1 }),
 
     onConnect: (connection) => {
       if (connection.source === connection.target) return;
       const { source, target, sourceHandle, targetHandle } = connection;
+      const edgeId = `${source}-${target}`;
+      const exists = get().edges.some((e) => e.id === edgeId || (e.source === source && e.target === target));
+      if (exists) return;
       set({
         edges: addEdge(
           {
-            id: `${source}-${target}`,
+            id: edgeId,
             source,
             target,
             type: 'default',
@@ -75,6 +84,7 @@ export const useAppStore = create<AppStore>()(
           },
           get().edges
         ),
+        nodesVersion: get().nodesVersion + 1,
       });
     },
 
@@ -94,6 +104,15 @@ export const useAppStore = create<AppStore>()(
             ? { ...node, data: { ...node.data, ...updates } }
             : node
         ),
+        nodesVersion: state.nodesVersion + 1,
+      })),
+
+    updateManyNodeData: (nodeIds, updates) =>
+      set((state) => ({
+        nodes: state.nodes.map((node) =>
+          nodeIds.includes(node.id) ? { ...node, data: { ...node.data, ...updates } } : node
+        ),
+        nodesVersion: state.nodesVersion + 1,
       })),
   })), { name: 'app-store' })
 );

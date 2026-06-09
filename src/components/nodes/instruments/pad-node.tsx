@@ -36,11 +36,14 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const octave = data.octave || 3;
   const selectedKey = data.selectedKey || 'C';
   const selectedScaleType = data.selectedScaleType || 'major';
-  const grid =
-    data.grid ||
-    Array(16)
-      .fill(null)
-      .map(() => Array(8).fill(false));
+  const baseGrid =
+    data.grid && data.grid.length > 0
+      ? data.grid
+      : Array(16)
+          .fill(null)
+          .map(() => Array(8).fill(false));
+  // Ensure grid has enough rows for current steps
+  const grid = baseGrid.length >= steps ? baseGrid : [...baseGrid, ...Array(steps - baseGrid.length).fill(null).map(() => Array(8).fill(false))];
   const columnModifiers = data.columnModifiers || {};
   const selectedButtons = new Set(data.selectedButtons || []);
   const noteGroups = data.noteGroups || {};

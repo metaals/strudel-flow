@@ -1,30 +1,25 @@
 import { Edge } from '@xyflow/react';
-import { AppNode, nodesConfig, nodeTypes } from '@/components/nodes';
+import { AppNode, nodesConfig } from '@/components/nodes';
 import { findConnectedComponents } from './graph-utils';
 import { logger } from './logger';
-
-type NodeWithStrudelOutput = {
-  strudelOutput?: (node: AppNode, strudelString: string) => string;
-};
+import { getNodeOutput } from './node-outputs';
 
 export function getNodeStrudelOutput(nodeType: string) {
-  const NodeComponent = nodeTypes[nodeType as keyof typeof nodeTypes] as NodeWithStrudelOutput;
-  return NodeComponent?.strudelOutput;
+  return getNodeOutput(nodeType);
 }
+
+const SOUND_REGEX = /\.sound\("([^"]+)"\)\.sound\("([^"]+)"\)/g;
 
 function optimizeSoundCalls(strudelString: string): string {
   let optimized = strudelString;
   let previousLength = 0;
+  let iterations = 0;
+  const maxIterations = 10;
 
-  // Keep applying optimization until no more changes are made
-  while (optimized.length !== previousLength) {
+  while (optimized.length !== previousLength && iterations < maxIterations) {
     previousLength = optimized.length;
-    // Replace consecutive .sound() calls with combined ones
-    // This regex matches: .sound("something").sound("something else")
-    optimized = optimized.replace(
-      /\.sound\("([^"]+)"\)\.sound\("([^"]+)"\)/g,
-      '.sound("$1 $2")'
-    );
+    optimized = optimized.replace(SOUND_REGEX, '.sound("$1 $2")');
+    iterations++;
   }
 
   return optimized;
@@ -34,13 +29,32 @@ function isSoundSource(node: AppNode): boolean {
   return category === 'Instruments';
 }
 
+export interface GenerateResult {
+  pattern: string;
+  errors: Array<{ nodeId: string; type: string; message: string }>;
+  durationMs: number;
+}
+
 export function generateOutput(
   nodes: AppNode[],
   edges: Edge[],
   cpm: string,
   bpc: string
 ): string {
+  return generateOutputWithErrors(nodes, edges, cpm, bpc).pattern;
+}
+
+export function generateOutputWithErrors(
+  nodes: AppNode[],
+  edges: Edge[],
+  cpm: string,
+  bpc: string
+): GenerateResult {
+  const start = performance.now();
   const nodePatterns: Record<string, string> = {};
+  const errors: GenerateResult['errors'] = [];
+  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+
   for (const node of nodes) {
     const strudelOutput = getNodeStrudelOutput(node.type);
     if (!strudelOutput) continue;
@@ -51,7 +65,9 @@ export function generateOutput(
         nodePatterns[node.id] = pattern;
       }
     } catch (err) {
-      logger.warn(`Error generating pattern for node ${node.type}:`, err);
+      const message = err instanceof Error ? err.message : String(err);
+      errors.push({ nodeId: node.id, type: node.type, message });
+      logger.warn(`Error generating pattern for node ${node.type}:`, err, { nodeId: node.id });
     }
   }
 
@@ -59,9 +75,7 @@ export function generateOutput(
   const finalPatterns: { pattern: string; paused: boolean }[] = [];
 
   for (const componentNodeIds of components) {
-    const componentNodes = componentNodeIds
-      .map((id) => nodes.find((n) => n.id === id))
-      .filter(Boolean) as AppNode[];
+    const componentNodes = componentNodeIds.map((id) => nodeMap.get(id)).filter(Boolean) as AppNode[];
 
     const [sources, effects] = componentNodes.reduce<[AppNode[], AppNode[]]>(
       ([src, eff], node) => {
@@ -106,7 +120,9 @@ export function generateOutput(
     }
   }
 
-  if (finalPatterns.length === 0) return '';
+  const durationMs = performance.now() - start;
+
+  if (finalPatterns.length === 0) return { pattern: '', errors, durationMs };
 
   const result = finalPatterns
     .map(({ pattern, paused }) => {
@@ -119,8 +135,8 @@ export function generateOutput(
   if (result) {
     const bpm = parseInt(cpm) || 120;
     const beatsPerCycle = parseInt(bpc) || 4;
-    return `setcpm(${bpm}/${beatsPerCycle})\n${result}`;
+    return { pattern: `setcpm(${bpm}/${beatsPerCycle})\n${result}`, errors, durationMs };
   }
 
-  return result;
+  return { pattern: result, errors, durationMs };
 }
