@@ -45,18 +45,52 @@ export function padOutput(node: AppNode, strudelString: string): string {
   return strudelString ? `${strudelString}.n("${pattern}").scale("${scale}")` : `n("${pattern}").scale("${scale}")`;
 }
 
+const ARP_PATTERNS = [
+  { id: 'up', pattern: [0, 1, 2] },
+  { id: 'down', pattern: [2, 1, 0] },
+  { id: 'up-down', pattern: [0, 1, 2, 1] },
+  { id: 'down-up', pattern: [2, 1, 0, 1] },
+  { id: 'inside-out', pattern: [1, 0, 2] },
+  { id: 'outside-in', pattern: [0, 2, 1] },
+];
+
+const expandPatternAcrossOctaves = (
+  basePattern: number[],
+  octaves: number
+): string => {
+  if (octaves === 1) {
+    return basePattern.join(' ');
+  }
+  const expandedPattern: number[] = [];
+  for (let octave = 0; octave < octaves; octave++) {
+    const octaveOffset = octave * 7;
+    basePattern.forEach((note) => {
+      expandedPattern.push(note + octaveOffset);
+    });
+  }
+  return expandedPattern.join(' ');
+};
+
 export function arpeggiatorOutput(node: AppNode, strudelString: string): string {
   const { data } = node;
-  const key = data.selectedKey || 'C';
-  const scaleType = data.selectedScaleType || 'major';
+  const selectedPattern = data.selectedPattern || '';
+  const octaveRange = data.octaveRange || 1;
   const octave = data.octave || 4;
-  const octaveRange = data.octaveRange || 2;
-  const pattern = data.selectedPattern || 'up';
-  const chordType = data.selectedChordType || 'major';
+  const selectedChordType = data.selectedChordType || 'major';
+  const selectedKey = data.selectedKey || 'C';
 
-  const scale = `${key}${octave}:${scaleType}`;
-  const arpCall = `arp("${pattern}").arpMode("${chordType}").arpRange(${octaveRange})`;
-  return strudelString ? `${strudelString}.n("0 1 2 3").scale("${scale}").${arpCall}` : `n("0 1 2 3").scale("${scale}").${arpCall}`;
+  if (!selectedPattern) return strudelString;
+
+  const patternData = ARP_PATTERNS.find((p) => p.id === selectedPattern);
+  if (!patternData) return strudelString;
+
+  const finalPattern = expandPatternAcrossOctaves(
+    patternData.pattern,
+    octaveRange
+  );
+  const arpCall = `n("${finalPattern}").scale("${selectedKey}${octave}:${selectedChordType}")`;
+
+  return strudelString ? `${strudelString}.stack(${arpCall})` : arpCall;
 }
 
 const CHORD_INTERVALS = {
