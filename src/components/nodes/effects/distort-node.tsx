@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -54,4 +54,10 @@ DistortNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const distortCall = `distort(${distort})`;
   return strudelString ? `${strudelString}.${distortCall}` : distortCall;
+};
+
+export const distortNodeDef = {
+  type: 'distort-node' as const,
+  component: DistortNode,
+  config: { title: 'Distortion', category: 'Audio Effects' as const, icon: 'Zap' as const },
 };

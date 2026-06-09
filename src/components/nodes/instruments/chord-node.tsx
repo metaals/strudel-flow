@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 
 import { AccordionControls } from '@/components/accordion-controls';
@@ -178,4 +178,10 @@ ChordNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const notePattern = `n("${notes}").scale("${scale}")`;
   return strudelString ? `${strudelString}.${notePattern}` : notePattern;
+};
+
+export const chordNodeDef = {
+  type: 'chord-node' as const,
+  component: ChordNode,
+  config: { title: 'Chords', category: 'Instruments' as const, icon: 'Music2' as const },
 };

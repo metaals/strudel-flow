@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import {
@@ -122,4 +122,10 @@ PolyrhythmNode.strudelOutput = (node: AppNode, strudelString: string) => {
   return strudelString
     ? `${strudelString}.stack(${stackPattern})`
     : stackPattern;
+};
+
+export const polyrhythmNodeDef = {
+  type: 'polyrhythm-node' as const,
+  component: PolyrhythmNode,
+  config: { title: 'Polyrhythm', category: 'Instruments' as const, icon: 'Layers' as const },
 };

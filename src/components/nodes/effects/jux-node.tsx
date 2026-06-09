@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 
@@ -59,4 +59,10 @@ JuxNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const juxCall = `jux(${jux})`;
   return strudelString ? `${strudelString}.${juxCall}` : juxCall;
+};
+
+export const juxNodeDef = {
+  type: 'jux-node' as const,
+  component: JuxNode,
+  config: { title: 'Jux', category: 'Audio Effects' as const, icon: 'Split' as const },
 };

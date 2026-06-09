@@ -12,7 +12,7 @@ ADSRNode.strudelOutput = (node: AppNode, strudelString: string) => {
 };
 
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -82,3 +82,9 @@ export function ADSRNode({ id, data }: WorkflowNodeProps) {
     </WorkflowNode>
   );
 }
+
+export const adsrNodeDef = {
+  type: 'adsr-node' as const,
+  component: ADSRNode,
+  config: { title: 'ADSR', category: 'Time Effects' as const, icon: 'Activity' as const },
+};

@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, lazy, Suspense } from 'react';
 import { Play, Pause, Trash, NotebookText } from 'lucide-react';
 
 import {
@@ -8,13 +8,18 @@ import {
   NodeHeaderAction,
   NodeHeaderIcon,
 } from '@/components/node-header';
-import { WorkflowNodeData, AppNodeType } from '@/components/nodes/';
-import nodesConfig from '@/components/nodes/';
+import { WorkflowNodeData, AppNodeType } from '@/components/nodes/types';
+
+const INSTRUMENT_TYPES: Set<string> = new Set([
+  'pad-node', 'arpeggiator-node', 'chord-node',
+  'polyrhythm-node', 'beat-machine-node', 'custom-node',
+]);
 import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { iconMapping } from '@/data/icon-mapping';
 import { BaseNode } from '@/components/base-node';
 import { useAppStore } from '@/store/app-store';
-import PatternPopup from '@/components/pattern-popup';
+import { ErrorBoundary } from '@/components/error-boundary';
+const PatternPopup = lazy(() => import('@/components/pattern-popup'));
 import { BaseHandle } from '@/components/base-handle';
 import { Position } from '@xyflow/react';
 import { findConnectedComponents } from '@/lib/graph-utils';
@@ -42,9 +47,7 @@ function WorkflowNode({
   const isPaused = nodeState === 'paused';
 
   // Determine if this node is an instrument based on its type
-  const isInstrument = type
-    ? nodesConfig[type]?.category === 'Instruments'
-    : false;
+  const isInstrument = type ? INSTRUMENT_TYPES.has(type) : false;
 
   // Find all connected nodes for this group using findConnectedComponents
   const { connectedNodeIds } = useMemo(() => {
@@ -110,8 +113,12 @@ function WorkflowNode({
           </NodeHeaderAction>
         </NodeHeaderActions>
       </NodeHeader>
-      {children}
-      {show && <PatternPopup id={id} />}
+      <ErrorBoundary>{children}</ErrorBoundary>
+      {show && (
+        <Suspense>
+          <PatternPopup id={id} />
+        </Suspense>
+      )}
     </BaseNode>
   );
 }

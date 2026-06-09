@@ -1,7 +1,7 @@
 import { Edge } from '@xyflow/react';
-import { AppNode } from '@/components/nodes';
-import nodesConfig, { nodeTypes } from '@/components/nodes';
+import { AppNode, nodesConfig, nodeTypes } from '@/components/nodes';
 import { findConnectedComponents } from './graph-utils';
+import { logger } from './logger';
 
 type NodeWithStrudelOutput = {
   strudelOutput?: (node: AppNode, strudelString: string) => string;
@@ -51,7 +51,7 @@ export function generateOutput(
         nodePatterns[node.id] = pattern;
       }
     } catch (err) {
-      console.warn(`Error generating pattern for node ${node.type}:`, err);
+      logger.warn(`Error generating pattern for node ${node.type}:`, err);
     }
   }
 

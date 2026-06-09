@@ -2,8 +2,8 @@ import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useStrudelStore } from '@/store/strudel-store';
 import { useAppStore } from '@/store/app-store';
 import { generateOutput } from '@/lib/strudel';
-// @ts-expect-error - Missing type declarations for @strudel/web
 import { evaluate, hush } from '@strudel/web';
+import { logger } from '@/lib/logger';
 
 export function useWorkflowRunner() {
   const isRunning = useRef(false);
@@ -63,9 +63,9 @@ export function useWorkflowRunner() {
           errorMessage.includes('Cannot read properties of undefined');
 
         if (isKnownWarning) {
-          console.warn('Strudel pattern warning (suppressed):', errorMessage);
+          logger.pattern('Strudel pattern warning (suppressed):', errorMessage);
         } else {
-          console.error('Strudel evaluation error:', err);
+          logger.error('Strudel evaluation error:', err);
         }
       }
     },

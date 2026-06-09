@@ -1,5 +1,6 @@
 import { compressToBase64, decompressFromBase64 } from 'lz-string';
 import { Node, Edge, ColorMode } from '@xyflow/react';
+import { logger } from './logger';
 
 export interface ProjectState {
   nodes: Node[];
@@ -22,7 +23,7 @@ export function decodeState(encoded: string): ProjectState | null {
     if (!json) return null;
     return JSON.parse(json) as ProjectState;
   } catch (error) {
-    console.error('Failed to decode state:', error);
+    logger.error('Failed to decode state:', error);
     return null;
   }
 }
@@ -48,7 +49,7 @@ export function stateFromJson(json: string): ProjectState | null {
   try {
     return JSON.parse(json) as ProjectState;
   } catch (error) {
-    console.error('Failed to parse state from JSON:', error);
+    logger.error('Failed to parse state from JSON:', error);
     return null;
   }
 }

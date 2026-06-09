@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { subscribeWithSelector } from 'zustand/middleware';
+import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import {
   addEdge,
   applyEdgeChanges,
@@ -38,7 +38,7 @@ export type AppActions = {
 export type AppStore = AppState & AppActions;
 
 export const useAppStore = create<AppStore>()(
-  subscribeWithSelector((set, get) => ({
+  devtools(subscribeWithSelector((set, get) => ({
     nodes: initialNodes,
     edges: initialEdges,
     colorMode: 'light',
@@ -95,7 +95,7 @@ export const useAppStore = create<AppStore>()(
             : node
         ),
       })),
-  }))
+  })), { name: 'app-store' })
 );
 
 useAppStore.subscribe(

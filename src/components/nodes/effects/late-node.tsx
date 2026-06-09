@@ -1,6 +1,6 @@
 import { useAppStore } from '@/store/app-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { Button } from '@/components/ui/button';
 
 const LATE_OFFSETS = [
@@ -141,4 +141,10 @@ LateNode.strudelOutput = (node: AppNode, strudelString: string) => {
     pattern && pattern !== offset ? `.late("${pattern}")` : `.late(${offset})`;
 
   return strudelString + lateCall;
+};
+
+export const lateNodeDef = {
+  type: 'late-node' as const,
+  component: LateNode,
+  config: { title: 'Late', category: 'Time Effects' as const, icon: 'Clock' as const },
 };

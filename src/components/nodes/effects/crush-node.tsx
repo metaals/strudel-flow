@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -36,4 +36,10 @@ CrushNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const crushCall = `crush(${crush})`;
   return strudelString ? `${strudelString}.${crushCall}` : crushCall;
+};
+
+export const crushNodeDef = {
+  type: 'crush-node' as const,
+  component: CrushNode,
+  config: { title: 'Crush', category: 'Audio Effects' as const, icon: 'Hash' as const },
 };

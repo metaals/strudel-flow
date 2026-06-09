@@ -1,6 +1,6 @@
 import { useAppStore } from '@/store/app-store';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { Button } from '@/components/ui/button';
 
 const MASK_PATTERNS = [
@@ -81,4 +81,10 @@ MaskNode.strudelOutput = (node: AppNode, strudelString: string) => {
     maskCall = `.sometimes(${probability}, x => x${maskCall})`;
   }
   return strudelString + maskCall;
+};
+
+export const maskNodeDef = {
+  type: 'mask-node' as const,
+  component: MaskNode,
+  config: { title: 'Mask', category: 'Time Effects' as const, icon: 'EyeOff' as const },
 };

@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -36,4 +36,10 @@ PostGainNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const postgainCall = `postgain(${postgain})`;
   return strudelString ? `${strudelString}.${postgainCall}` : postgainCall;
+};
+
+export const postgainNodeDef = {
+  type: 'postgain-node' as const,
+  component: PostGainNode,
+  config: { title: 'PostGain', category: 'Audio Effects' as const, icon: 'Volume2' as const },
 };

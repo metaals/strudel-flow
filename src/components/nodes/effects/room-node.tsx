@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -56,4 +56,10 @@ RoomNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const roomCalls = calls.join('.');
   return strudelString ? `${strudelString}.${roomCalls}` : roomCalls;
+};
+
+export const roomNodeDef = {
+  type: 'room-node' as const,
+  component: RoomNode,
+  config: { title: 'Room', category: 'Audio Effects' as const, icon: 'CheckCheck' as const },
 };

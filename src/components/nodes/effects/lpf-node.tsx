@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -69,4 +69,10 @@ LpfNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const lpfCall = `lpf("${lpf}")`;
   return strudelString ? `${strudelString}.${lpfCall}` : lpfCall;
+};
+
+export const lpfNodeDef = {
+  type: 'lpf-node' as const,
+  component: LpfNode,
+  config: { title: 'LPF', category: 'Audio Effects' as const, icon: 'Filter' as const },
 };

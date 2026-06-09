@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/
 import { Switch } from '@/components/ui/switch';
 import { CellState, ModifierDropdown } from './pad-utils/modifiers';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { PadButton } from './pad-utils/pad-button';
@@ -340,4 +340,10 @@ BeatMachineNode.strudelOutput = (node: AppNode, strudelString: string) => {
       : `stack(${validPatterns.join(', ')})`;
 
   return strudelString ? `${strudelString}.stack(${beatCall})` : beatCall;
+};
+
+export const beatMachineNodeDef = {
+  type: 'beat-machine-node' as const,
+  component: BeatMachineNode,
+  config: { title: 'Beats', category: 'Instruments' as const, icon: 'Grid3x3' as const },
 };

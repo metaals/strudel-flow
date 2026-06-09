@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 
@@ -134,4 +134,10 @@ PlyNode.strudelOutput = (node: AppNode, strudelString: string) => {
     plyCall = `.sometimes(${probability}, x => x${plyCall})`;
   }
   return strudelString + plyCall;
+};
+
+export const plyNodeDef = {
+  type: 'ply-node' as const,
+  component: PlyNode,
+  config: { title: 'Ply', category: 'Time Effects' as const, icon: 'Copy' as const },
 };

@@ -2,172 +2,126 @@
 
 A visual drum machine and pattern sequencer built with [Strudel.cc](https://strudel.cc), [React Flow](https://reactflow.dev), and styled using [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/). Create complex musical patterns by connecting instrument nodes to effect nodes with a drag-and-drop interface.
 
-[Live Demo](https://xyflow.com/strudel-flow)
-
-## Table of Contents
-
-- [Getting Started](#getting-started)
-- [Tech Stack](#tech-stack)
-- [Node Types](#node-types)
-- [Usage Guide](#usage-guide)
-- [Pattern Syntax](#pattern-syntax)
-- [Development](#development)
-- [Contributing](#contributing)
+> Fork of [xyflow/strudel-flow](https://github.com/xyflow/strudel-flow).
 
 ## Getting Started
 
-To get started, follow these steps:
-
-1. **Install dependencies**:
-
-   ```bash
-   npm install
-   # or
-   yarn install
-   # or
-   pnpm install
-   # or
-   bun install
-   ```
-
-2. **Run the development server**:
-
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
-   # or
-   bun dev
-   ```
+```bash
+pnpm install
+pnpm dev
+```
 
 ## Tech Stack
 
-- **Audio Engine**: [Strudel.cc](https://strudel.cc) - Web-based live coding environment
-
-- **React Flow Components**: The project uses [React Flow Components](https://reactflow.dev/components) to build nodes. These components are designed to help you quickly get up to speed on projects.
-
-- **shadcn CLI**: The project uses the [shadcn CLI](https://ui.shadcn.com/docs/cli) to manage UI components. This tool builds on top of [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/) components, making it easy to add and customize UI elements.
-
-- **State Management with Zustand**: The application uses Zustand for state management, providing a simple and efficient way to manage the state of nodes, edges, and other workflow-related data.
+- **Audio Engine**: [Strudel.cc](https://strudel.cc) — web-based live coding environment
+- **Node Graph**: [React Flow](https://reactflow.dev) v12 — drag-and-drop node canvas
+- **UI**: [shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS](https://tailwindcss.com/) v4
+- **State**: [Zustand](https://github.com/pmndrs/zustand) v5
 
 ## Node Types
 
-### 🎵 Instruments
+### Instruments
 
-- **Pad Node** - Grid-based step sequencer with scales and modifiers
-- **Beat Machine** - Classic drum machine with multiple instrument tracks
-- **Arpeggiator** - Pattern-based arpeggiated sequences with visual feedback
-- **Chord Node** - Interactive chord player with scale selection
-- **Polyrhythm** - Multiple overlapping rhythmic patterns
-- **Custom Node** - Direct Strudel pattern input
+- **Pad** — Grid-based step sequencer with scales and modifiers
+- **Beat Machine** — Classic drum machine with multiple instrument tracks
+- **Arpeggiator** — Pattern-based arpeggiated sequences with visual feedback
+- **Chords** — Interactive chord player with scale selection
+- **Polyrhythm** — Multiple overlapping rhythmic patterns
+- **Custom Code** — Direct Strudel pattern input
 
-### 🎛️ Synths
+### Synths
 
-- **Drum Sounds** - Sample-based drum sound selection
-- **Sample Select** - Custom sample playback and selection
+- **Drums** — Sample-based drum sound selection
+- **Synths** — Synthesizer sound selection
 
-### 🎚️ Audio Effects
+### Audio Effects
 
-- **Gain** - Volume control and amplification
-- **PostGain** - Secondary gain stage
-- **Distortion** - Saturation and harmonic distortion
-- **LPF** - Low-pass filtering with cutoff control
-- **Pan** - Stereo positioning and width
-- **Phaser** - Sweeping phase modulation effect
-- **Crush** - Bit-crushing and sample rate reduction
-- **Jux** - Alternating left/right channel effects
-- **FM** - Frequency modulation synthesis
-- **Room** - Realistic acoustic space simulation with size, fade, and filtering controls
+- **Gain** / **PostGain** — Volume control
+- **Distortion** — Saturation and harmonic distortion
+- **LPF** — Low-pass filter with cutoff and resonance
+- **Pan** — Stereo positioning
+- **Phaser** — Sweeping phase modulation
+- **Crush** — Bit-crushing
+- **Jux** — Stereo channel effects
+- **FM** — Frequency modulation synthesis
+- **Room** — Reverb with size, fade, and filtering controls
+- **ADSR** — Envelope (attack, decay, sustain, release)
 
-### ⏱️ Time Effects
+### Time Effects
 
-- **Fast** - Speed multiplication (×2, ×3, ×4)
-- **Slow** - Speed division (÷2, ÷3, ÷4)
-- **Late** - Pattern delay and offset timing
-- **ASDR** - Manages Attack, Release, Sustain and Decay controls
-- **Reverse** - Reverse pattern playback
-- **Palindrome** - Bidirectional pattern playback
-- **Mask** - Probabilistic pattern masking
-- **Ply** - Pattern subdivision and multiplication
+- **Fast** / **Slow** — Speed multiplication and division
+- **Late** — Pattern delay and offset
+- **Reverse** — Reverse playback
+- **Palindrome** — Bidirectional playback
+- **Mask** — Probabilistic pattern masking
+- **Ply** — Pattern subdivision
 
-## Usage Guide
+## Usage
 
 ### Creating Patterns
 
-1. **Basic Pattern**:
-   - Add a drum machine or pad node
-   - Click buttons to activate steps
-   - Adjust tempo with BPM control
-
-2. **Complex Patterns**:
-   - Use Shift+click to select multiple notes for grouping
-   - Apply row modifiers for per-step effects
-   - Chain multiple nodes for layered sounds
+1. Add an instrument node from the sidebar (click or drag)
+2. Click grid buttons to activate steps
+3. Adjust tempo with BPM control
 
 ### Connecting Nodes
 
-- **Source to Effect**: Drag from sound source to effect node
-- **Effect Chaining**: Connect multiple effects in series
-- **Multiple Sources**: Connect multiple sources to the same effect
+- Drag from a source handle (bottom) to an effect handle (top)
+- Chain multiple effects in series
+- Connect multiple sources to the same effect chain
 
 ### Pattern Modifiers
 
-Each step can have modifiers applied:
-
-- **Normal**: Standard playback
-- **Fast (×2, ×3, ×4)**: Speed multiplication
-- **Slow (/2, /3, /4)**: Speed division
-- **Replicate (!2, !3, !4)**: Note repetition
-- **Elongate (@2, @3, @4)**: Note duration extension
-
-### Performance Controls
-
-- **Global Play/Pause**: Press spacebar to pause/resume all active patterns
-- **Group Controls**: Pause/resume connected node groups independently
-- **Live Pattern Editing**: Modify patterns while playing with real-time updates
-- **Pattern Preview**: View generated Strudel code for each node
+Each step in Pad/Beat Machine nodes supports modifiers:
+- **Fast** (×2, ×3, ×4) — speed multiplication
+- **Slow** (/2, /3, /4) — speed division
+- **Replicate** (!2, !3, !4) — note repetition
+- **Elongate** (@2, @3, @4) — note duration extension
 
 ### Keyboard Shortcuts
 
-- **Spacebar**: Global play/pause toggle
-- **Shift + Click**: Multi-select grid cells for grouping (in Pad nodes)
-- **Right-click**: Context menu for pattern modifiers
+- **Spacebar** — global play/pause
+- **Shift+Click** — multi-select grid cells for grouping (Pad nodes)
+- **Right-click** — context menu for pattern modifiers
 
 ## Development
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for how the system works and [CLAUDE.md](./CLAUDE.md) for development conventions.
+
+```bash
+pnpm dev            # start dev server
+pnpm build          # typecheck + production build
+pnpm lint           # eslint
+pnpm test           # vitest watch mode
+pnpm test:run       # vitest single run
+```
 
 ### Project Structure
 
 ```
 src/
-├── components/          # React components
-│   ├── nodes/          # Flow node components
-│   │   ├── instruments/ # Instrument node implementations
-│   │   ├── effects/    # Effect node implementations
-│   │   └── synths/     # Synthesizer node implementations
+├── components/
+│   ├── nodes/          # node components + registry
+│   │   ├── instruments/ 
+│   │   ├── effects/    
+│   │   └── synths/     
 │   ├── ui/             # shadcn/ui components
-│   ├── workflow/       # Flow editor components
-│   └── edges/          # Custom edge components
-├── data/               # Static data and configurations
-├── hooks/              # Custom React hooks
-├── lib/                # Utility libraries and core logic
+│   ├── workflow/       # ReactFlow canvas + controls
+│   └── layouts/        # app shell
 ├── store/              # Zustand state management
+├── hooks/              # custom React hooks
+├── lib/                # core logic + utilities
+├── data/               # sounds, themes, static config
+└── types/              # ambient type declarations
 ```
 
 ## Acknowledgments
 
 - [Strudel.cc](https://strudel.cc)
-- [tweakcn](https://tweakcn.com)
 - [React Flow](https://reactflow.dev)
 - [shadcn/ui](https://ui.shadcn.com)
+- [tweakcn](https://tweakcn.com)
 
----
+## License
 
-## Contact Us
-
-We’re here to help! If you have any questions, feedback, instrument recommendations, or just want to share your project with us, feel free to reach out:
-
-- **Contact Form**: Use the contact form on our [website](https://xyflow.com/contact).
-- **Email**: Drop us an email at [info@xyflow.com](mailto:info@xyflow.com).
-- **Discord**: Join our [Discord server](https://discord.com/invite/RVmnytFmGW) to connect with the community and get support.
+[AGPL-3.0](./LICENSE)

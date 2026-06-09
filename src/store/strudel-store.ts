@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 
 type StrudelStore = {
   pattern: string;
@@ -9,11 +10,11 @@ type StrudelStore = {
   setBpc: (bpc: string) => void;
 };
 
-export const useStrudelStore = create<StrudelStore>((set) => ({
+export const useStrudelStore = create<StrudelStore>()(devtools((set) => ({
   pattern: '',
   cpm: '120',
   bpc: '4',
   setPattern: (pattern) => set({ pattern }),
   setCpm: (cpm) => set({ cpm }),
   setBpc: (bpc) => set({ bpc }),
-}));
+}), { name: 'strudel-store' }));

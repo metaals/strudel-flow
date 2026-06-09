@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -44,4 +44,10 @@ FastNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const fastCall = `fast(${fast})`;
   return strudelString ? `${strudelString}.${fastCall}` : fastCall;
+};
+
+export const fastNodeDef = {
+  type: 'fast-node' as const,
+  component: FastNode,
+  config: { title: 'Fast', category: 'Time Effects' as const, icon: 'FastForward' as const },
 };

@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -44,4 +44,10 @@ SlowNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const slowCall = `slow(${slow})`;
   return strudelString ? `${strudelString}.${slowCall}` : slowCall;
+};
+
+export const slowNodeDef = {
+  type: 'slow-node' as const,
+  component: SlowNode,
+  config: { title: 'Slow', category: 'Time Effects' as const, icon: 'Rewind' as const },
 };

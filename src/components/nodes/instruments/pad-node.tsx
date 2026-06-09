@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/app-store';
 import { getSchedulerNow } from '@/lib/strudel-clock';
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 
 import { CellState, ModifierDropdown } from './pad-utils/modifiers';
 import { toggleCell, isButtonSelected } from './pad-utils/button-utils';
@@ -191,4 +191,10 @@ PadNode.strudelOutput = (node: AppNode, strudelString: string) => {
   return strudelString
     ? `${strudelString}.n("${pattern}").scale("${scale}")`
     : `n("${pattern}").scale("${scale}")`;
+};
+
+export const padNodeDef = {
+  type: 'pad-node' as const,
+  component: PadNode,
+  config: { title: 'Pad', category: 'Instruments' as const, icon: 'Spline' as const },
 };

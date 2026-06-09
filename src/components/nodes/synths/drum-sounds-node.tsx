@@ -5,7 +5,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAppStore } from '@/store/app-store';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { DRUM_CATEGORIES } from '@/data/sounds';
 import { CategorySelectItems } from '@/components/category-select-items';
@@ -40,4 +40,10 @@ DrumSoundsNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const soundCall = `sound("${node.data.sound}")`;
   return strudelString ? `${strudelString}.${soundCall}` : soundCall;
+};
+
+export const drumSoundsNodeDef = {
+  type: 'drum-sounds-node' as const,
+  component: DrumSoundsNode,
+  config: { title: 'Drums', category: 'Synths' as const, icon: 'Music' as const },
 };

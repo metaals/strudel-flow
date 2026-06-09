@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -48,4 +48,10 @@ GainNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const gainCall = `gain(${gain})`;
   return strudelString ? `${strudelString}.${gainCall}` : gainCall;
+};
+
+export const gainNodeDef = {
+  type: 'gain-node' as const,
+  component: GainNode,
+  config: { title: 'Gain', category: 'Audio Effects' as const, icon: 'Volume2' as const },
 };

@@ -22,11 +22,13 @@ import {
 } from '@/components/ui/sidebar';
 import { SettingsDialog } from '@/components/settings-dialog';
 import { SaveProjectDialog } from '@/components/save-project-dialog';
-import nodesConfig, {
+import {
+  nodesConfig,
   AppNode,
+  type AppNodeType,
   createNodeByType,
-  type NodeConfig,
 } from '@/components/nodes';
+import { type NodeConfigEntry } from '@/components/nodes/registry';
 import { cn } from '@/lib/utils';
 import { iconMapping } from '@/data/icon-mapping';
 import { useAppStore } from '@/store/app-store';
@@ -116,7 +118,7 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
     }
     acc[node.category].push(node);
     return acc;
-  }, {} as Record<string, NodeConfig[]>);
+  }, {} as Record<string, NodeConfigEntry[]>);
 
   return (
     <Sidebar className="border-r-0" {...props}>
@@ -195,14 +197,14 @@ const selector = (state: AppStore) => ({
   addNode: state.addNode,
 });
 
-function DraggableItem(props: NodeConfig) {
+function DraggableItem(props: NodeConfigEntry) {
   const { screenToFlowPosition } = useReactFlow();
   const { addNode } = useAppStore(useShallow(selector));
   const [isDragging, setIsDragging] = useState(false);
 
   const onClick = useCallback(() => {
     const newNode: AppNode = createNodeByType({
-      type: props.id,
+      type: props.id as AppNodeType,
       position: screenToFlowPosition({
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,

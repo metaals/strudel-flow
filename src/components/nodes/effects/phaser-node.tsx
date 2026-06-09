@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -98,4 +98,10 @@ PhaserNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const phaserCall = `phaser(${phaser}).phaserdepth(${phaserdepth})`;
   return strudelString ? `${strudelString}.${phaserCall}` : phaserCall;
+};
+
+export const phaserNodeDef = {
+  type: 'phaser-node' as const,
+  component: PhaserNode,
+  config: { title: 'Phaser', category: 'Audio Effects' as const, icon: 'Waves' as const },
 };

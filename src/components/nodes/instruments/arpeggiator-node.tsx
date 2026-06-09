@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { AccordionControls } from '@/components/accordion-controls';
 import { cn } from '@/lib/utils';
@@ -164,4 +164,10 @@ ArpeggiatorNode.strudelOutput = (node: AppNode, strudelString: string) => {
   const arpCall = `n("${finalPattern}").scale("${selectedKey}${octave}:${selectedChordType}")`;
 
   return strudelString ? `${strudelString}.stack(${arpCall})` : arpCall;
+};
+
+export const arpeggiatorNodeDef = {
+  type: 'arpeggiator-node' as const,
+  component: ArpeggiatorNode,
+  config: { title: 'Arpeggiator', category: 'Instruments' as const, icon: 'Zap' as const },
 };

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getNodeStrudelOutput } from '@/lib/strudel';
 import { useReactFlow } from '@xyflow/react';
 import { useAppStore } from '@/store/app-store';
-import { AppNode } from '@/components/nodes';
+import { AppNode } from '@/components/nodes/types';
 
 export default function PatternPopup({
   className = '',

@@ -5,7 +5,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAppStore } from '@/store/app-store';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { SYNTH_CATEGORIES } from '@/data/sounds';
 import { CategorySelectItems } from '@/components/category-select-items';
@@ -39,4 +39,10 @@ SynthSelectNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const soundCall = `sound("${node.data.sound}")`;
   return strudelString ? `${strudelString}.${soundCall}` : soundCall;
+};
+
+export const synthSelectNodeDef = {
+  type: 'synth-select-node' as const,
+  component: SynthSelectNode,
+  config: { title: 'Synths', category: 'Synths' as const, icon: 'CheckCheck' as const },
 };

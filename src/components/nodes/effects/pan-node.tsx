@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -71,4 +71,10 @@ PanNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const panCall = `pan(${pan})`;
   return strudelString ? `${strudelString}.${panCall}` : panCall;
+};
+
+export const panNodeDef = {
+  type: 'pan-node' as const,
+  component: PanNode,
+  config: { title: 'Pan', category: 'Audio Effects' as const, icon: 'Move' as const },
 };

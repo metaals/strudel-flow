@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import {
   Accordion,
@@ -108,4 +108,10 @@ CustomNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const pattern = customPattern.trim();
   return strudelString ? `${strudelString}.stack(${pattern})` : pattern;
+};
+
+export const customNodeDef = {
+  type: 'custom-node' as const,
+  component: CustomNode,
+  config: { title: 'Custom Code', category: 'Instruments' as const, icon: 'Code' as const },
 };

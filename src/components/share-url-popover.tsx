@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/store/app-store';
 import { useStrudelStore } from '@/store/strudel-store';
 import { getShareUrl } from '@/lib/project-state';
+import { toast } from 'sonner';
 
 export function ShareUrlPopover() {
   const [isCopied, setIsCopied] = useState(false);
@@ -25,8 +26,8 @@ export function ShareUrlPopover() {
       await navigator.clipboard.writeText(displayUrl);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy URL:', error);
+    } catch {
+      toast.error('Failed to copy URL to clipboard');
     }
   };
 

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { themeStyles } from '@/data/css/themes';
+import { logger } from '@/lib/logger';
 
 export function useThemeCss(theme: string) {
   useEffect(() => {
@@ -22,10 +23,7 @@ export function useThemeCss(theme: string) {
       styleElement.textContent = themeCSS;
       document.head.appendChild(styleElement);
     } else {
-      console.warn(
-        `Theme "${theme}" not found. Available themes:`,
-        Object.keys(themeStyles)
-      );
+      logger.warn(`Theme "${theme}" not found. Available:`, Object.keys(themeStyles));
     }
   }, [theme]);
 }

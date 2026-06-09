@@ -1,5 +1,5 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
-import { WorkflowNodeProps, AppNode } from '..';
+import { WorkflowNodeProps, AppNode } from '../types';
 import { useAppStore } from '@/store/app-store';
 import { Slider } from '@/components/ui/slider';
 
@@ -36,4 +36,10 @@ FmNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
   const fmCall = `fm(${fm})`;
   return strudelString ? `${strudelString}.${fmCall}` : fmCall;
+};
+
+export const fmNodeDef = {
+  type: 'fm-node' as const,
+  component: FmNode,
+  config: { title: 'FM', category: 'Audio Effects' as const, icon: 'Radio' as const },
 };
