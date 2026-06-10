@@ -11,4 +11,5 @@ declare module '@strudel/web' {
   export function evaluate(code: string): void;
   export function hush(): void;
   export function samples(url: string): void;
+  export function getAudioContext(): AudioContext;
 }

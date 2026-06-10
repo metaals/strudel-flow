@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { ReactFlowProvider } from '@xyflow/react';
 import { initStrudel, samples } from '@strudel/web';
 import { setSchedulerNow } from '@/lib/strudel-clock';
+import { initAudioMaster } from '@/lib/strudel-engine';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/sonner';
 import SidebarLayout from '@/components/layouts/sidebar-layout';
@@ -12,6 +13,7 @@ import './index.css';
 
 initStrudel().then((repl) => {
   setSchedulerNow(() => repl.scheduler.now());
+  initAudioMaster();
 });
 samples('github:tidalcycles/dirt-samples');
 

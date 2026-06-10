@@ -1,10 +1,96 @@
-import { evaluate, hush } from '@strudel/web';
+import { evaluate, hush, getAudioContext as getStrudelAudioContext } from '@strudel/web';
 import { generateOutputWithErrors } from './strudel';
 import { logger } from './logger';
 import type { AppNode } from '@/components/nodes';
 import type { Edge } from '@xyflow/react';
 
 export type StrudelErrorCode = 'KNOWN_WARNING' | 'EVAL_ERROR' | 'EMPTY_PATTERN';
+
+// --- Audio master tap -------------------------------------------------------
+// Insert a single master gain node in series between Strudel/superdough's output
+// and the hardware destination, exposing the live AudioContext and master node
+// so downstream code (recording, streaming, visualizers) can branch a tap off
+// the master without altering what the user hears.
+//
+// superdough builds its output graph lazily on the first sound and connects its
+// final node to `ctx.destination`. By shadowing `ctx.destination` with our own
+// master gain (which we connect to the real destination) before the first sound
+// plays, superdough routes through `master` transparently.
+//
+// Known limitation: superdough sets `ctx.destination.channelCount` to the
+// hardware max during its lazy init; after shadowing, that assignment lands on
+// the master gain instead. For the app's stereo default this is identical.
+let _audioContext: AudioContext | null = null;
+let _masterNode: GainNode | null = null;
+let _audioMasterInitialized = false;
+
+/**
+ * Idempotently surface the single @strudel/web AudioContext and insert a master
+ * gain node in series before the hardware destination. Safe to call repeatedly
+ * (StrictMode / repeated setup); subsequent calls return the cached nodes.
+ * Must run before the first sound plays so superdough picks up the shadowed
+ * destination during its lazy graph init.
+ */
+export function initAudioMaster(): { ctx: AudioContext; master: GainNode } {
+  if (_audioMasterInitialized && _audioContext && _masterNode) {
+    return { ctx: _audioContext, master: _masterNode };
+  }
+
+  const ctx = getStrudelAudioContext();
+  const realDestination = ctx.destination;
+  const master = ctx.createGain();
+
+  // superdough reads destination.maxChannelCount during its lazy init; mirror it
+  // on the master gain so that code path behaves as if it had the real node.
+  Object.defineProperty(master, 'maxChannelCount', {
+    value: realDestination.maxChannelCount,
+    configurable: true,
+  });
+
+  master.connect(realDestination);
+
+  // Shadow ctx.destination so superdough's output lands in our master gain.
+  Object.defineProperty(ctx, 'destination', {
+    get: () => master,
+    configurable: true,
+  });
+
+  _audioContext = ctx;
+  _masterNode = master;
+  _audioMasterInitialized = true;
+  logger.debug('Audio master initialized', { maxChannelCount: realDestination.maxChannelCount });
+
+  return { ctx, master };
+}
+
+/** Returns the live AudioContext used by @strudel/web (lazy-inits the master). */
+export function getAudioContext(): AudioContext {
+  return initAudioMaster().ctx;
+}
+
+/**
+ * Returns the master gain node sitting between Strudel output and the hardware
+ * destination (lazy-inits if needed). Branch a tap off it without changing level
+ * via `getMasterNode().connect(analyser)` — a fan-out leaves the existing
+ * `master → destination` path intact, so perceived volume is unchanged.
+ */
+export function getMasterNode(): GainNode {
+  return initAudioMaster().master;
+}
+
+/**
+ * Set the master output volume. `volume` is a linear gain (0 = silent, 1 = unity).
+ * Applied with a short ramp to avoid clicks. Safe to call before/after init.
+ */
+export function setMasterVolume(volume: number): void {
+  try {
+    const master = getMasterNode();
+    const now = master.context.currentTime;
+    master.gain.setTargetAtTime(Math.max(0, volume), now, 0.01);
+  } catch (e) {
+    logger.warn('setMasterVolume failed', e);
+  }
+}
 
 export interface StrudelEngineState {
   isRunning: boolean;
