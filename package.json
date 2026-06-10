@@ -11,7 +11,8 @@
     "predeploy": "pnpm build",
     "deploy": "gh-pages -d dist",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "verify": "tsc --noEmit && pnpm lint && pnpm test:run && pnpm build"
   },
   "dependencies": {
     "@dagrejs/dagre": "^1.1.4",
