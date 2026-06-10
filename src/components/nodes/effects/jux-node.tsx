@@ -1,10 +1,9 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Button } from '@/components/ui/button';
 
 export function JuxNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const effect = data.jux || 'rev';
 
   // Available jux effects
@@ -17,7 +16,7 @@ export function JuxNode({ id, data }: WorkflowNodeProps) {
 
   // Handler for effect changes
   const handleEffectChange = (newEffect: string) => {
-    updateNodeData(id, { jux: newEffect });
+    graphApi.setParam(id, 'jux', newEffect);
   };
 
   return (

@@ -2,7 +2,7 @@
 id: P1-001
 title: Programmatic graph/command API
 phase: 1
-status: todo
+status: done
 priority: 1
 depends_on: []
 est: L
@@ -15,14 +15,14 @@ layer (Phase 9) and collaboration (Phase 8) will reuse, and it makes mutations t
 serializable.
 
 ## Acceptance Criteria
-- [ ] A new module (e.g. `src/lib/graph-api.ts`) exposes typed commands: at minimum
+- [x] A new module (e.g. `src/lib/graph-api.ts`) exposes typed commands: at minimum
       `addNode`, `removeNode`, `connect`, `disconnect`, `setParam` (wraps `updateNodeData`),
       and read accessors `getGraph` / `getNode`.
-- [ ] All commands route through the existing `app-store` so undo/persistence/rendering keep
+- [x] All commands route through the existing `app-store` so undo/persistence/rendering keep
       working; no component bypasses the API for mutations it covers.
-- [ ] Each command has unit tests in `src/store/__tests__/` or `src/lib/__tests__/`.
-- [ ] Public functions are documented with TSDoc and exported from a single barrel.
-- [ ] No behavior change visible to the user (pure refactor + new surface).
+- [x] Each command has unit tests in `src/store/__tests__/` or `src/lib/__tests__/`.
+- [x] Public functions are documented with TSDoc and exported from a single barrel.
+- [x] No behavior change visible to the user (pure refactor + new surface).
 
 ## Implementation Notes
 - Reuse `app-store` actions: `addNode`, `removeNode`, `updateNodeData`, `onConnect`

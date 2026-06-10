@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import {
   Accordion,
   AccordionContent,
@@ -104,14 +104,12 @@ function ParamControl({
 }
 
 export function CustomInstrumentNode({ id, data, type }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
   const code = data.code ?? STARTER_CODE;
   const { params } = useMemo(() => parseCustomInstrument(code), [code]);
   const values = data.paramValues ?? {};
 
   const setValue = (name: string, v: CustomParamValue) => {
-    updateNodeData(id, { paramValues: { ...values, [name]: v } });
+    graphApi.setParam(id, 'paramValues', { ...values, [name]: v });
   };
 
   return (
@@ -144,7 +142,7 @@ export function CustomInstrumentNode({ id, data, type }: WorkflowNodeProps) {
               <div className="flex flex-col gap-3">
                 <Textarea
                   value={code}
-                  onChange={(e) => updateNodeData(id, { code: e.target.value })}
+                  onChange={(e) => graphApi.setParam(id, 'code', e.target.value)}
                   placeholder={
                     '@param GAIN: dial(0..1) = 0.5\n---\nsound("bd sd").gain($GAIN)'
                   }

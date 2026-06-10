@@ -1,10 +1,9 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Slider } from '@/components/ui/slider';
 
 export function DistortNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const distortValue = data.distort || '0.5';
 
   // Extract values or set defaults
@@ -20,7 +19,7 @@ export function DistortNode({ id, data }: WorkflowNodeProps) {
     const newAmount = value[0];
     const distortValue =
       postgain !== 1 ? `${newAmount}:${postgain}` : `${newAmount}`;
-    updateNodeData(id, { distort: distortValue });
+    graphApi.setParam(id, 'distort', distortValue);
   };
 
   return (

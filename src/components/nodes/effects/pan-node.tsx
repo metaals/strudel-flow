@@ -1,10 +1,9 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Slider } from '@/components/ui/slider';
 
 export function PanNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const pan = data.pan ? parseFloat(data.pan) : 0.5;
 
   // Get pan description
@@ -16,7 +15,7 @@ export function PanNode({ id, data }: WorkflowNodeProps) {
 
   // Handler for pan changes
   const handlePanChange = (value: number[]) => {
-    updateNodeData(id, { pan: value[0].toString() });
+    graphApi.setParam(id, 'pan', value[0].toString());
   };
 
   return (

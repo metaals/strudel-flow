@@ -3,7 +3,7 @@ import { Switch } from '@/components/ui/switch';
 import { CellState, ModifierDropdown } from './pad-utils/modifiers';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Button } from '@/components/ui/button';
 import { PadButton } from './pad-utils/pad-button';
 import { DRUM_CATEGORIES } from '@/data/sounds';
@@ -106,8 +106,6 @@ function SequencerRow({
 }
 
 export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
   // Modifier toggle state (persisted in node data)
   const modifiersEnabled = typeof data.modifiersEnabled === 'boolean' ? data.modifiersEnabled : false;
 
@@ -146,7 +144,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
       });
       return { ...row, pattern: newPattern, modifiers: newModifiers };
     });
-    updateNodeData(id, { steps: newSteps, rows: newRows });
+    graphApi.setParams(id, { steps: newSteps, rows: newRows });
   };
 
   // Track counter handlers
@@ -159,17 +157,17 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
         modifiers: {},
       },
     ];
-    updateNodeData(id, { rows: newRows });
+    graphApi.setParam(id, 'rows', newRows);
   };
   const removeTrack = () => {
     if (rows.length <= 1) return;
     const newRows = rows.slice(0, -1);
-    updateNodeData(id, { rows: newRows });
+    graphApi.setParam(id, 'rows', newRows);
   };
 
   // Modifier toggle handler
   const setModifiersEnabled = (enabled: boolean) => {
-    updateNodeData(id, { modifiersEnabled: enabled });
+    graphApi.setParam(id, 'modifiersEnabled', enabled);
   };
 
   const toggleStep = (rowIndex: number, step: number) => {
@@ -182,14 +180,14 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
       }
       return row;
     });
-    updateNodeData(id, { rows: newRows });
+    graphApi.setParam(id, 'rows', newRows);
   };
 
   const handleInstrumentChange = (rowIndex: number, instrument: string) => {
     const newRows = rows.map((row, i) =>
       i === rowIndex ? { ...row, instrument } : row,
     );
-    updateNodeData(id, { rows: newRows });
+    graphApi.setParam(id, 'rows', newRows);
   };
 
   const handleModifierSelect = (rowIndex: number, stepIdx: number, modifier: CellState) => {
@@ -206,7 +204,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
       }
       return { ...row, modifiers };
     });
-    updateNodeData(id, { rows: newRows });
+    graphApi.setParam(id, 'rows', newRows);
   };
 
   const clearAll = () => {
@@ -215,7 +213,7 @@ export function BeatMachineNode({ id, data, type }: WorkflowNodeProps) {
       pattern: Array(steps).fill(false),
       modifiers: {},
     }));
-    updateNodeData(id, { rows: newRows });
+    graphApi.setParam(id, 'rows', newRows);
   };
 
   return (

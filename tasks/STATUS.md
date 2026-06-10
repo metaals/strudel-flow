@@ -13,7 +13,7 @@ Legend: `todo` · `doing` · `done` · `blocked`
 ## Phase 1 — Foundations
 | ID | Title | Status | Priority | Depends on |
 | -- | ----- | ------ | -------- | ---------- |
-| [P1-001](./P1-001-graph-command-api.md) | Programmatic graph/command API | todo | 1 | — |
+| [P1-001](./P1-001-graph-command-api.md) | Programmatic graph/command API | done | 1 | — |
 | [P1-002](./P1-002-audiocontext-master-tap.md) | AudioContext / master output tap | todo | 1 | — |
 | [P1-003](./P1-003-indexeddb-persistence.md) | IndexedDB persistence layer | todo | 2 | — |
 | [P1-004](./P1-004-compiler-test-coverage.md) | Expand compiler test coverage | todo | 3 | — |
@@ -68,8 +68,9 @@ Legend: `todo` · `doing` · `done` · `blocked`
 ## Next eligible task
 
 Lowest `priority`, then lowest ID, among `todo` tasks whose `depends_on` are all `done`:
-**→ [P1-001](./P1-001-graph-command-api.md)**
+**→ [P1-002](./P1-002-audiocontext-master-tap.md)**
 
 ## Progress log
 
 - 2026-06-10 — P0-001 — Bootstrap roadmap, tasks, loop & verify gate.
+- 2026-06-10 — P1-001 — Programmatic graph/command API: added `src/lib/graph-api.ts` and migrated all covered mutation call sites through it.

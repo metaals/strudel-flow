@@ -1,6 +1,6 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { AccordionControls } from '@/components/accordion-controls';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -78,8 +78,6 @@ function ArpeggioVisualizer({
 }
 
 export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
   // Use node data directly with defaults
   const selectedPattern = data.selectedPattern || '';
   const octaveRange = data.octaveRange || 1;
@@ -95,7 +93,7 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
             <div
               key={p.id}
               className="flex flex-col items-center gap-2 cursor-pointer"
-              onClick={() => updateNodeData(id, { selectedPattern: p.id })}
+              onClick={() => graphApi.setParam(id, 'selectedPattern', p.id)}
             >
               <ArpeggioVisualizer
                 pattern={p.pattern}
@@ -108,12 +106,12 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
         <AccordionControls
           keyScaleOctaveProps={{
             selectedKey,
-            onKeyChange: (key) => updateNodeData(id, { selectedKey: key }),
+            onKeyChange: (key) => graphApi.setParam(id, 'selectedKey', key),
             selectedScale: selectedChordType,
             onScaleChange: (scale) =>
-              updateNodeData(id, { selectedChordType: scale }),
+              graphApi.setParam(id, 'selectedChordType', scale),
             octave,
-            onOctaveChange: (oct) => updateNodeData(id, { octave: oct }),
+            onOctaveChange: (oct) => graphApi.setParam(id, 'octave', oct),
           }}
         >
           <div className="flex flex-col gap-2">
@@ -130,7 +128,7 @@ export function ArpeggiatorNode({ id, data, type }: WorkflowNodeProps) {
                   size="sm"
                   className="h-8 text-xs"
                   onClick={() =>
-                    updateNodeData(id, { octaveRange: preset.octaves })
+                    graphApi.setParam(id, 'octaveRange', preset.octaves)
                   }
                 >
                   {preset.label}

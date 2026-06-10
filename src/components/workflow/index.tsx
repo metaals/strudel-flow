@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { nodeTypes } from '@/components/nodes';
 import deleteEdge from '@/components/delete-edge';
 import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { WorkflowControls } from './controls';
 import { useDragAndDrop } from '@/hooks/use-drag-and-drop';
 import { useUrlStateLoader } from '@/hooks/use-url-state';
@@ -25,7 +26,6 @@ export default function Workflow() {
     theme,
     onNodesChange,
     onEdgesChange,
-    onConnect,
   } = useAppStore(
     useShallow((state) => ({
       nodes: state.nodes,
@@ -34,7 +34,6 @@ export default function Workflow() {
       theme: state.theme,
       onNodesChange: state.onNodesChange,
       onEdgesChange: state.onEdgesChange,
-      onConnect: state.onConnect,
     })),
   );
 
@@ -50,7 +49,7 @@ export default function Workflow() {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onConnect={graphApi.connect}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         onDragOver={onDragOver}

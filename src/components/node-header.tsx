@@ -5,11 +5,12 @@ import {
   ReactNode,
   ComponentProps,
 } from 'react';
-import { useNodeId, useReactFlow } from '@xyflow/react';
+import { useNodeId } from '@xyflow/react';
 import { EllipsisVertical, Trash } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Slot } from '@radix-ui/react-slot';
+import { graphApi } from '@/lib/graph-api';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -185,11 +186,10 @@ NodeHeaderMenuAction.displayName = 'NodeHeaderMenuAction';
 
 export const NodeHeaderDeleteAction = () => {
   const id = useNodeId();
-  const { setNodes } = useReactFlow();
 
   const handleClick = useCallback(() => {
-    setNodes((prevNodes) => prevNodes.filter((node) => node.id !== id));
-  }, [id, setNodes]);
+    if (id) graphApi.removeNode(id);
+  }, [id]);
 
   return (
     <NodeHeaderAction onClick={handleClick} variant="ghost" label="Delete node">

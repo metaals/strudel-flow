@@ -1,4 +1,4 @@
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
 import { Button } from '@/components/ui/button';
@@ -39,8 +39,6 @@ const LATE_PATTERNS = [
 ];
 
 export function LateNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
   // Read current values from node.data
   const selectedOffset = data.lateOffsetId || 'small';
   const selectedPattern = data.latePatternId || 'constant';
@@ -60,7 +58,7 @@ export function LateNode({ id, data }: WorkflowNodeProps) {
         finalPattern = offsetData.offset;
       }
 
-      updateNodeData(id, {
+      graphApi.setParams(id, {
         lateOffsetId: offsetId,
         lateOffset: offsetData.offset,
         latePattern: finalPattern,
@@ -83,7 +81,7 @@ export function LateNode({ id, data }: WorkflowNodeProps) {
         finalPattern = offsetData.offset;
       }
 
-      updateNodeData(id, {
+      graphApi.setParams(id, {
         latePatternId: patternId,
         lateOffset: offsetData.offset,
         latePattern: finalPattern,

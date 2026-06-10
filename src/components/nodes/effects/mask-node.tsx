@@ -1,4 +1,4 @@
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
 import { Button } from '@/components/ui/button';
@@ -20,8 +20,6 @@ const PROBABILITY_OPTIONS = [
 ];
 
 export function MaskNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
   const selectedPattern = data.maskPatternId || 'half';
   const selectedProbability = data.maskProbabilityId || 'always';
 
@@ -36,7 +34,7 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
                 key={pattern.id}
                 variant={selectedPattern === pattern.id ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => updateNodeData(id, { maskPatternId: pattern.id })}
+                onClick={() => graphApi.setParam(id, 'maskPatternId', pattern.id)}
                 title={pattern.description}
               >
                 {pattern.label}
@@ -53,7 +51,7 @@ export function MaskNode({ id, data }: WorkflowNodeProps) {
                 key={prob.id}
                 variant={selectedProbability === prob.id ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => updateNodeData(id, { maskProbabilityId: prob.id })}
+                onClick={() => graphApi.setParam(id, 'maskProbabilityId', prob.id)}
                 title={prob.description}
               >
                 {prob.label}

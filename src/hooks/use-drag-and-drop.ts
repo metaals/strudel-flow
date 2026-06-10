@@ -1,17 +1,11 @@
 import { useCallback, useMemo } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { useShallow } from 'zustand/react/shallow';
 
 import { AppNode, createNodeByType } from '@/components/nodes';
-import { useAppStore, AppStore } from '@/store/app-store';
-
-const selector = (state: AppStore) => ({
-  addNode: state.addNode,
-});
+import { graphApi } from '@/lib/graph-api';
 
 export function useDragAndDrop() {
   const { screenToFlowPosition } = useReactFlow();
-  const { addNode } = useAppStore(useShallow(selector));
 
   const onDrop: React.DragEventHandler = useCallback(
     (event) => {
@@ -31,9 +25,9 @@ export function useDragAndDrop() {
         position,
         data: nodeProps.data,
       });
-      addNode(newNode);
+      graphApi.addNode(newNode);
     },
-    [addNode, screenToFlowPosition]
+    [screenToFlowPosition]
   );
 
   const onDragOver: React.DragEventHandler = useCallback(

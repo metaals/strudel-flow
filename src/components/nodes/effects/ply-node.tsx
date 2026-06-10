@@ -1,6 +1,6 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Button } from '@/components/ui/button';
 
 const PLY_MULTIPLIERS = [
@@ -50,8 +50,6 @@ const PROBABILITY_OPTIONS = [
 ];
 
 export function PlyNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
   // Read current values from node.data
   const selectedMultiplier = data.plyMultiplierId || 'x2';
   const selectedProbability = data.plyProbabilityId || 'always';
@@ -59,7 +57,7 @@ export function PlyNode({ id, data }: WorkflowNodeProps) {
   const handleMultiplierChange = (multiplierId: string) => {
     const multiplierData = PLY_MULTIPLIERS.find((m) => m.id === multiplierId);
     if (multiplierData) {
-      updateNodeData(id, {
+      graphApi.setParams(id, {
         plyMultiplierId: multiplierId,
         plyMultiplier: multiplierData.multiplier,
       });
@@ -71,7 +69,7 @@ export function PlyNode({ id, data }: WorkflowNodeProps) {
       (p) => p.id === probabilityId
     );
     if (probabilityData) {
-      updateNodeData(id, {
+      graphApi.setParams(id, {
         plyProbabilityId: probabilityId,
         plyProbability: probabilityData.probability,
       });

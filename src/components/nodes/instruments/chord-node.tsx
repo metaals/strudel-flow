@@ -1,6 +1,6 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 
 import { AccordionControls } from '@/components/accordion-controls';
 
@@ -47,8 +47,6 @@ const getChordNotes = (
 };
 
 export function ChordNode({ id, data, type }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
   // Use node data directly with defaults
   const selectedKey = data.selectedKey || 'C';
   const scaleType = data.scaleType || 'major';
@@ -64,7 +62,7 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
     } else {
       newPressed.add(scaleStep);
     }
-    updateNodeData(id, { pressedKeys: Array.from(newPressed) });
+    graphApi.setParam(id, 'pressedKeys', Array.from(newPressed));
   };
 
   const currentScaleDegrees =
@@ -133,22 +131,22 @@ export function ChordNode({ id, data, type }: WorkflowNodeProps) {
         <AccordionControls
           keyScaleOctaveProps={{
             selectedKey,
-            onKeyChange: (key) => updateNodeData(id, { selectedKey: key }),
+            onKeyChange: (key) => graphApi.setParam(id, 'selectedKey', key),
             selectedScale: scaleType,
             onScaleChange: (scale) => {
               // Only allow major and minor scales for chord node
               if (scale === 'major' || scale === 'minor') {
-                updateNodeData(id, { scaleType: scale });
+                graphApi.setParam(id, 'scaleType', scale);
               }
             },
             octave,
-            onOctaveChange: (oct) => updateNodeData(id, { octave: oct }),
+            onOctaveChange: (oct) => graphApi.setParam(id, 'octave', oct),
             allowedScales: ['major', 'minor'],
           }}
           chordControlsProps={{
             chordComplexity,
             onChordComplexityChange: (complexity) =>
-              updateNodeData(id, { chordComplexity: complexity }),
+              graphApi.setParam(id, 'chordComplexity', complexity),
           }}
         />
       </div>

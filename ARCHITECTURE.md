@@ -26,7 +26,8 @@ This is the core of the app — how visual nodes become sound.
 
 ```
 1. Node UI interaction
-   └→ updateNodeData(id, {...})           [Zustand app-store]
+   └→ graphApi.setParam/setParams/addNode/...   [src/lib/graph-api.ts]
+      └→ updateNodeData(id, {...}) etc.          [Zustand app-store]
 
 2. Store change triggers recomputation
    └→ useWorkflowRunner                   [src/hooks/use-workflow-runner.tsx]
@@ -76,6 +77,12 @@ Primary store for the graph and UI:
 Key actions: `onNodesChange`, `onEdgesChange`, `onConnect`, `addNode`, `removeNode`, `updateNodeData`, `setTheme`, `toggleDarkMode`.
 
 Uses `subscribeWithSelector` middleware for fine-grained subscriptions. A top-level subscription syncs the `dark` CSS class on `<html>` when `colorMode` changes.
+
+### Graph Command API (src/lib/graph-api.ts)
+
+A thin, imperative command layer that is the single typed entry point for graph mutations. It exports named functions plus an aggregate `graphApi` object: `addNode`, `removeNode`, `connect`, `disconnect`, `disconnectEdge`, `setParam`, `setParams`, `setManyParams`, and the read accessors `getGraph` / `getNode`. Each command routes through the existing `app-store` actions (via `useAppStore.getState()`), so undo/persistence/rendering/`nodesVersion` keep working. Components and hooks call `graphApi.*` from event handlers instead of mutating the store (or the React Flow instance) directly; reactive value reads still use `useAppStore(selector)`. This is the substrate the future AI/MCP layer (Phase 9) and collaboration (Phase 8) reuse, and it makes mutations testable and serializable.
+
+To avoid the documented node import cycle, `graph-api.ts` imports values only from `app-store`/`@xyflow/react` and takes `AppNode`/`WorkflowNodeData` as type-only imports; `addNode` accepts a prebuilt node (callers build nodes with `createNodeByType`). Bulk project/URL loads (`setNodes`/`setEdges`) and the React Flow `onNodesChange`/`onEdgesChange` handlers remain on the store, outside the covered command set.
 
 ### strudel-store (src/store/strudel-store.ts)
 

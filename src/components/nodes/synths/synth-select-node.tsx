@@ -4,18 +4,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { WorkflowNodeProps, AppNode } from '../types';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { SYNTH_CATEGORIES } from '@/data/sounds';
 import { CategorySelectItems } from '@/components/category-select-items';
 
 export function SynthSelectNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const sound = data.sound || '';
 
   const handleValueChange = (value: string) => {
-    updateNodeData(id, { sound: value });
+    graphApi.setParam(id, 'sound', value);
   };
 
   return (

@@ -1,12 +1,12 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { useWorkflowRunner } from './use-workflow-runner';
 import { hush } from '@strudel/web';
 
 export function useGlobalPlayback() {
   const { runWorkflow, stopWorkflow } = useWorkflowRunner();
   const nodes = useAppStore((state) => state.nodes);
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
   const [isGloballyPaused, setIsGloballyPaused] = useState(false);
   const nodeStatesBeforePause = useRef<
@@ -21,28 +21,28 @@ export function useGlobalPlayback() {
       const currentState = node.data.state || 'paused';
       if (currentState === 'running') {
         nodeStatesBeforePause.current[node.id] = 'running';
-        updateNodeData(node.id, { state: 'paused' });
+        graphApi.setParam(node.id, 'state', 'paused');
       }
     });
 
     hush();
     stopWorkflow();
     setIsGloballyPaused(true);
-  }, [nodes, stopWorkflow, isGloballyPaused, updateNodeData]);
+  }, [nodes, stopWorkflow, isGloballyPaused]);
 
   const globalPlay = useCallback(() => {
     if (!isGloballyPaused) return;
 
     Object.keys(nodeStatesBeforePause.current).forEach((nodeId) => {
       if (nodeStatesBeforePause.current[nodeId] === 'running') {
-        updateNodeData(nodeId, { state: 'running' });
+        graphApi.setParam(nodeId, 'state', 'running');
       }
     });
 
     nodeStatesBeforePause.current = {};
     setIsGloballyPaused(false);
     runWorkflow();
-  }, [updateNodeData, runWorkflow, isGloballyPaused]);
+  }, [runWorkflow, isGloballyPaused]);
 
   const toggleGlobalPlayback = useCallback(() => {
     if (isGloballyPaused) {

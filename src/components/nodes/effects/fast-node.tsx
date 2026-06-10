@@ -1,15 +1,14 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Slider } from '@/components/ui/slider';
 
 export function FastNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const factor = data.fast ? parseFloat(data.fast) : 2;
 
   const handleSliderChange = (values: number[]) => {
     const value = values[0];
-    updateNodeData(id, { fast: value.toString() });
+    graphApi.setParam(id, 'fast', value.toString());
   };
 
   return (

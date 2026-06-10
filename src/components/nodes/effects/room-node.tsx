@@ -1,6 +1,6 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Slider } from '@/components/ui/slider';
 
 const ROOM_PARAMS = [
@@ -12,8 +12,6 @@ const ROOM_PARAMS = [
 ] as const;
 
 export function RoomNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
   return (
     <WorkflowNode id={id} data={data}>
       <div className="flex flex-col gap-4 p-3 min-w-80">
@@ -27,7 +25,7 @@ export function RoomNode({ id, data }: WorkflowNodeProps) {
               </div>
               <Slider
                 value={[value]}
-                onValueChange={([v]) => updateNodeData(id, { [key]: v.toFixed(2) })}
+                onValueChange={([v]) => graphApi.setParam(id, key, v.toFixed(2))}
                 min={min}
                 max={max}
                 step={step}

@@ -1,18 +1,16 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Slider } from '@/components/ui/slider';
 
 export function PhaserNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
   // Extract values or set defaults
   const speed = data.phaser ? parseFloat(data.phaser) : 1;
   const depth = data.phaserdepth ? parseFloat(data.phaserdepth) : 0.5;
 
   // Handler for speed changes
   const handleSpeedChange = (value: number[]) => {
-    updateNodeData(id, {
+    graphApi.setParams(id, {
       phaser: value[0].toString(),
       phaserdepth: depth.toString(),
     });
@@ -20,7 +18,7 @@ export function PhaserNode({ id, data }: WorkflowNodeProps) {
 
   // Handler for depth changes
   const handleDepthChange = (value: number[]) => {
-    updateNodeData(id, {
+    graphApi.setParams(id, {
       phaser: speed.toString(),
       phaserdepth: value[0].toString(),
     });

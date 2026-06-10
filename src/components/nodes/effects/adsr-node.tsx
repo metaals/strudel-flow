@@ -13,11 +13,10 @@ ADSRNode.strudelOutput = (node: AppNode, strudelString: string) => {
 
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Slider } from '@/components/ui/slider';
 
 export function ADSRNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const attack = parseFloat(data.attack || '0.1');
   const decay = parseFloat(data.decay || '0.1');
   const sustain = parseFloat(data.sustain || '0.7');
@@ -32,7 +31,7 @@ export function ADSRNode({ id, data }: WorkflowNodeProps) {
           </label>
           <Slider
             value={[attack]}
-            onValueChange={value => updateNodeData(id, { attack: value[0].toString() })}
+            onValueChange={value => graphApi.setParam(id, 'attack', value[0].toString())}
             min={0}
             max={2}
             step={0.01}
@@ -45,7 +44,7 @@ export function ADSRNode({ id, data }: WorkflowNodeProps) {
           </label>
           <Slider
             value={[decay]}
-            onValueChange={value => updateNodeData(id, { decay: value[0].toString() })}
+            onValueChange={value => graphApi.setParam(id, 'decay', value[0].toString())}
             min={0}
             max={2}
             step={0.01}
@@ -58,7 +57,7 @@ export function ADSRNode({ id, data }: WorkflowNodeProps) {
           </label>
           <Slider
             value={[sustain]}
-            onValueChange={value => updateNodeData(id, { sustain: value[0].toString() })}
+            onValueChange={value => graphApi.setParam(id, 'sustain', value[0].toString())}
             min={0}
             max={1}
             step={0.01}
@@ -71,7 +70,7 @@ export function ADSRNode({ id, data }: WorkflowNodeProps) {
           </label>
           <Slider
             value={[release]}
-            onValueChange={value => updateNodeData(id, { release: value[0].toString() })}
+            onValueChange={value => graphApi.setParam(id, 'release', value[0].toString())}
             min={0}
             max={2}
             step={0.01}

@@ -1,10 +1,9 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Slider } from '@/components/ui/slider';
 
 export function CrushNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const crush = parseFloat(data.crush || '4');
 
   return (
@@ -17,7 +16,7 @@ export function CrushNode({ id, data }: WorkflowNodeProps) {
           <Slider
             value={[crush]}
             onValueChange={(value) =>
-              updateNodeData(id, { crush: value[0].toString() })
+              graphApi.setParam(id, 'crush', value[0].toString())
             }
             min={1}
             max={16}

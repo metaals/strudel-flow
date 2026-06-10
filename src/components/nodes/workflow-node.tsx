@@ -14,6 +14,7 @@ import { useWorkflowRunner } from '@/hooks/use-workflow-runner';
 import { iconMapping } from '@/data/icon-mapping';
 import { BaseNode } from '@/components/base-node';
 import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { ErrorBoundary } from '@/components/error-boundary';
 const PatternPopup = lazy(() => import('@/components/pattern-popup'));
 import { BaseHandle } from '@/components/base-handle';
@@ -35,8 +36,6 @@ function WorkflowNode({
   const { forceEvaluate } = useWorkflowRunner();
   const [show, setShow] = useState(false);
 
-  const removeNode = useAppStore((s) => s.removeNode);
-  const updateMany = useAppStore((s) => s.updateManyNodeData);
   const edges = useAppStore((s) => s.edges);
   const nodes = useAppStore((s) => s.nodes);
   const nodeState = useAppStore((s) => s.nodes.find((n) => n.id === id)?.data?.state);
@@ -57,18 +56,18 @@ function WorkflowNode({
   }, [nodes, edges, id]);
 
   const onPlay = useCallback(() => {
-    updateMany(Array.from(connectedNodeIds), { state: 'running' });
+    graphApi.setManyParams(Array.from(connectedNodeIds), { state: 'running' });
     forceEvaluate();
-  }, [forceEvaluate, connectedNodeIds, updateMany]);
+  }, [forceEvaluate, connectedNodeIds]);
 
   const onPause = useCallback(() => {
-    updateMany(Array.from(connectedNodeIds), { state: 'paused' });
+    graphApi.setManyParams(Array.from(connectedNodeIds), { state: 'paused' });
     forceEvaluate();
-  }, [forceEvaluate, connectedNodeIds, updateMany]);
+  }, [forceEvaluate, connectedNodeIds]);
 
   const onDelete = useCallback(() => {
-    removeNode(id);
-  }, [id, removeNode]);
+    graphApi.removeNode(id);
+  }, [id]);
 
   const IconComponent = data?.icon ? iconMapping[data.icon] : undefined;
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { getSchedulerNow } from '@/lib/strudel-clock';
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
@@ -17,7 +17,6 @@ function applyColumnModifier(pattern: string, modifier: CellState): string {
 
 export function PadNode({ id, data, type }: WorkflowNodeProps) {
   const [activeStep, setActiveStep] = useState(-1);
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
 
   const steps = data.steps || 5;
 
@@ -59,9 +58,9 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
       grid,
       noteGroups,
       selectedButtons,
-      updateNodeData,
-      (groups) => updateNodeData(id, { noteGroups: groups }),
-      (buttons) => updateNodeData(id, { selectedButtons: Array.from(buttons) }),
+      graphApi.setParams,
+      (groups) => graphApi.setParam(id, 'noteGroups', groups),
+      (buttons) => graphApi.setParam(id, 'selectedButtons', Array.from(buttons)),
       id,
       event,
     );
@@ -73,7 +72,7 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
     } else {
       newColumnModifiers[stepIdx] = modifier;
     }
-    updateNodeData(id, { columnModifiers: newColumnModifiers });
+    graphApi.setParam(id, 'columnModifiers', newColumnModifiers);
   };
 
   return (
@@ -117,23 +116,23 @@ export function PadNode({ id, data, type }: WorkflowNodeProps) {
           <AccordionControls
             keyScaleOctaveProps={{
               selectedKey,
-              onKeyChange: (key) => updateNodeData(id, { selectedKey: key }),
+              onKeyChange: (key) => graphApi.setParam(id, 'selectedKey', key),
               selectedScale: selectedScaleType,
               onScaleChange: (scale) =>
-                updateNodeData(id, { selectedScaleType: scale }),
+                graphApi.setParam(id, 'selectedScaleType', scale),
               octave,
-              onOctaveChange: (oct) => updateNodeData(id, { octave: oct }),
+              onOctaveChange: (oct) => graphApi.setParam(id, 'octave', oct),
             }}
             padControlsProps={{
               steps,
-              onStepsChange: (s) => updateNodeData(id, { steps: s }),
+              onStepsChange: (s) => graphApi.setParam(id, 'steps', s),
               mode,
-              onModeChange: (m) => updateNodeData(id, { mode: m }),
+              onModeChange: (m) => graphApi.setParam(id, 'mode', m),
               noteGroups,
-              onClearGroups: () => updateNodeData(id, { noteGroups: {} }),
+              onClearGroups: () => graphApi.setParam(id, 'noteGroups', {}),
               selectedButtons,
               onClearSelection: () =>
-                updateNodeData(id, { selectedButtons: [] }),
+                graphApi.setParam(id, 'selectedButtons', []),
             }}
           />
         </div>

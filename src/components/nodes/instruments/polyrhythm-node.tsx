@@ -1,6 +1,6 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -47,8 +47,6 @@ const LAYERS = [
 ] as const;
 
 export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
-
   return (
     <WorkflowNode id={id} data={data} type={type}>
       <div className="flex flex-col gap-3 p-3 bg-card text-card-foreground rounded-md w-80">
@@ -61,7 +59,7 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
             <div key={soundKey} className="flex flex-col gap-2">
               <Select
                 value={sound}
-                onValueChange={(s) => updateNodeData(id, { [soundKey]: s })}
+                onValueChange={(s) => graphApi.setParam(id, soundKey, s)}
               >
                 <SelectTrigger size="sm" className="text-xs">
                   <SelectValue placeholder={defaultSound} />
@@ -82,9 +80,9 @@ export function PolyrhythmNode({ id, data, type }: WorkflowNodeProps) {
                       className="h-8 text-xs font-bold hover:text-muted-foreground"
                       onClick={() => {
                         if (activePattern === preset.pattern) {
-                          updateNodeData(id, { [activeKey]: !isActive });
+                          graphApi.setParam(id, activeKey, !isActive);
                         } else {
-                          updateNodeData(id, {
+                          graphApi.setParams(id, {
                             [patternKey]: preset.pattern,
                             [activeKey]: true,
                           });

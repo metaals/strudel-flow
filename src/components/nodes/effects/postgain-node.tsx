@@ -1,10 +1,9 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Slider } from '@/components/ui/slider';
 
 export function PostGainNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const postgain = parseFloat(data.postgain || '1');
 
   return (
@@ -17,7 +16,7 @@ export function PostGainNode({ id, data }: WorkflowNodeProps) {
           <Slider
             value={[postgain]}
             onValueChange={(value) =>
-              updateNodeData(id, { postgain: value[0].toString() })
+              graphApi.setParam(id, 'postgain', value[0].toString())
             }
             min={0.1}
             max={5}

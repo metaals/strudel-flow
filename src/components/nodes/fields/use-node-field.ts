@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import type { WorkflowNodeData } from '../types';
 
 export function useNodeField<K extends keyof WorkflowNodeData>(
@@ -13,15 +14,14 @@ export function useNodeField<K extends keyof WorkflowNodeData>(
     const node = s.nodes.find((n) => n.id === id);
     return (node?.data?.[key] ?? defaultValue) as WorkflowNodeData[K];
   });
-  const updateNodeData = useAppStore((s) => s.updateNodeData);
 
   const setValue = useCallback(
     (next: WorkflowNodeData[K] | ((prev: WorkflowNodeData[K]) => WorkflowNodeData[K])) => {
       const resolved = typeof next === 'function' ? (next as (p: WorkflowNodeData[K]) => WorkflowNodeData[K])(value) : next;
       const stored = serializer ? serializer(resolved) : resolved;
-      updateNodeData(id, { [key]: stored } as Partial<WorkflowNodeData>);
+      graphApi.setParam(id, key, stored as WorkflowNodeData[K]);
     },
-    [id, key, updateNodeData, value, serializer]
+    [id, key, value, serializer]
   );
 
   const setFromString = useCallback(
@@ -37,18 +37,17 @@ export function useNodeField<K extends keyof WorkflowNodeData>(
 
 export function useNodeData(id: string) {
   const data = useAppStore((s) => s.nodes.find((n) => n.id === id)?.data);
-  const updateNodeData = useAppStore((s) => s.updateNodeData);
   const setField = useCallback(
     <K extends keyof WorkflowNodeData>(key: K, value: WorkflowNodeData[K]) => {
-      updateNodeData(id, { [key]: value } as Partial<WorkflowNodeData>);
+      graphApi.setParam(id, key, value);
     },
-    [id, updateNodeData]
+    [id]
   );
   const setFields = useCallback(
     (partial: Partial<WorkflowNodeData>) => {
-      updateNodeData(id, partial);
+      graphApi.setParams(id, partial);
     },
-    [id, updateNodeData]
+    [id]
   );
   return { data, setField, setFields };
 }

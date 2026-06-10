@@ -1,10 +1,9 @@
 import WorkflowNode from '@/components/nodes/workflow-node';
 import { WorkflowNodeProps, AppNode } from '../types';
-import { useAppStore } from '@/store/app-store';
+import { graphApi } from '@/lib/graph-api';
 import { Slider } from '@/components/ui/slider';
 
 export function FmNode({ id, data }: WorkflowNodeProps) {
-  const updateNodeData = useAppStore((state) => state.updateNodeData);
   const fm = parseFloat(data.fm || '0');
 
   return (
@@ -17,7 +16,7 @@ export function FmNode({ id, data }: WorkflowNodeProps) {
           <Slider
             value={[fm]}
             onValueChange={(value) =>
-              updateNodeData(id, { fm: value[0].toString() })
+              graphApi.setParam(id, 'fm', value[0].toString())
             }
             min={0}
             max={10}

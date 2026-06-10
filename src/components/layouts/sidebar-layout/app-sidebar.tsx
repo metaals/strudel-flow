@@ -30,10 +30,10 @@ import {
 } from '@/components/nodes';
 import { type NodeConfigEntry } from '@/components/nodes/registry';
 import { cn } from '@/lib/utils';
+import { graphApi } from '@/lib/graph-api';
 import { iconMapping } from '@/data/icon-mapping';
 import { useAppStore } from '@/store/app-store';
 import { useShallow } from 'zustand/react/shallow';
-import { type AppStore } from '@/store/app-store';
 import { downloadState, stateFromJson } from '@/lib/project-state';
 import { useStrudelStore } from '@/store/strudel-store';
 import {
@@ -249,10 +249,6 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
   );
 }
 
-const selector = (state: AppStore) => ({
-  addNode: state.addNode,
-});
-
 function DraggableItem(
   props: NodeConfigEntry & {
     dragData?: WorkflowNodeData;
@@ -261,7 +257,6 @@ function DraggableItem(
 ) {
   const { dragData, onRemove, ...nodeProps } = props;
   const { screenToFlowPosition } = useReactFlow();
-  const { addNode } = useAppStore(useShallow(selector));
   const [isDragging, setIsDragging] = useState(false);
 
   const onClick = useCallback(() => {
@@ -274,8 +269,8 @@ function DraggableItem(
       data: dragData,
     });
 
-    addNode(newNode);
-  }, [nodeProps, dragData, addNode, screenToFlowPosition]);
+    graphApi.addNode(newNode);
+  }, [nodeProps, dragData, screenToFlowPosition]);
 
   const onDragStart = useCallback(
     (e: React.DragEvent) => {

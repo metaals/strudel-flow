@@ -1,15 +1,14 @@
-import { EdgeProps, useReactFlow } from '@xyflow/react';
+import { EdgeProps } from '@xyflow/react';
 import { memo } from 'react';
 import { X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { ButtonEdge } from '@/components/button-edge';
+import { graphApi } from '@/lib/graph-api';
 
 const DeleteEdge = memo((props: EdgeProps) => {
-  const { setEdges } = useReactFlow();
-
   const onDeleteEdge = () => {
-    setEdges((edges) => edges.filter((edge) => edge.id !== props.id));
+    graphApi.disconnectEdge(props.id);
   };
 
   return (
