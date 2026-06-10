@@ -108,6 +108,22 @@ Types (`AppNode`, `WorkflowNodeData`, etc.) remain in `src/components/nodes/inde
 - **`BaseHandle`** (`base-handle.tsx`) — styled React Flow connection handle
 - **`NodeHeader`** (`node-header.tsx`) — composable header with title, icon, action buttons
 
+### Custom Code Node
+
+`custom-instrument-node` (`src/components/nodes/instruments/custom-instrument-node.tsx`, titled **"Custom Code"**) lets users author a reusable node that declares its own inputs. The authoring syntax is a header of `@param` declarations, a `---` separator, then a body that references params with `$NAME`:
+
+```
+@param GAIN: dial(0..1) = 0.5
+@param INST: dropdown(bd, sd, hh) = bd
+@param REPEAT: stepper(1..8) = 2
+---
+sound("$INST*$REPEAT").gain($GAIN)
+```
+
+`src/lib/custom-instrument.ts` parses the header into a param schema (`dial`/`slider`, `stepper`, `dropdown`, `toggle`, `text`), renders one control per param (re-derived live via `useMemo` on `data.code`), and textually substitutes values into the body (so arithmetic like `.gain(0.1 * $GAIN)` is evaluated by Strudel, not us). A body starting with `.` appends to the incoming chain (effect), otherwise it is a base pattern source. `isSoundSource()` in `src/lib/strudel.ts` buckets the node by `data.role` when set (`'instrument'` ⇒ source, `'effect'` ⇒ effect) and otherwise falls back to body auto-detection via `isCustomInstrumentEffect()`.
+
+The legacy raw-textarea `custom-node` has been retired; older projects are migrated to `custom-instrument-node` (see Persistence).
+
 ## Theming
 
 12 themes defined as CSS files in `src/data/css/`, each overriding CSS custom properties using `oklch()` color space for both `:root` (light) and `.dark` (dark) modes.
@@ -118,8 +134,11 @@ Available: supabase (default), sunset-horizon, bold-tech, catppuccin, claymorphi
 
 ## Persistence
 
+### Saved Node Library
+`src/store/saved-nodes-store.ts` is a `persist`-backed Zustand store (localStorage key `sf_custom_instruments`, `version: 1`) holding user-saved custom nodes. Each `SavedNode` carries a `kind` of `'instrument'` or `'effect'`, defaulted from the body via `isCustomInstrumentEffect()` and overridable in the **"Save as Node"** dialog. The sidebar renders two groups — **"My Instruments"** and **"My Effects"** — of draggable entries that stamp a `custom-instrument-node` pre-filled with the saved `code` and a matching `data.role`. The full template is also copied inline into each node's `data`, so shared URLs and downloaded files keep working for viewers who never saved that node. The store's `migrate` upgrades the old `{ instruments: [...] }` shape and backfills missing `kind`.
+
 ### URL Sharing
-`src/lib/project-state.ts` serializes `ProjectState` (nodes, edges, theme, colorMode, cpm, bpc) to JSON, compresses via `lz-string.compressToBase64()`, and places it in the `?state=` URL parameter. `useUrlStateLoader` hook restores state on page load.
+`src/lib/project-state.ts` serializes `ProjectState` (nodes, edges, theme, colorMode, cpm, bpc) to JSON, compresses via `lz-string.compressToBase64()`, and places it in the `?state=` URL parameter. `useUrlStateLoader` hook restores state on page load. A versioned `migrate` chain (`PROJECT_STATE_VERSION = 4`) upgrades older payloads; `migrateV3toV4` rewrites any legacy `custom-node` into a `custom-instrument-node`, mapping its `customPattern` to `code`.
 
 ### File Save/Load
 `downloadState()` creates a JSON blob and triggers a browser download. The sidebar's load button reads `.json` files via `FileReader`.

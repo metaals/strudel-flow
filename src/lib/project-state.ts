@@ -3,7 +3,7 @@ import { Node, Edge, ColorMode } from '@xyflow/react';
 import { logger } from './logger';
 import { NODE_DEFAULTS, type AppNodeType } from '@/components/nodes/data';
 
-export const PROJECT_STATE_VERSION = 2;
+export const PROJECT_STATE_VERSION = 4;
 
 export interface ProjectState {
   version?: number;
@@ -28,10 +28,48 @@ function migrateV1toV2(state: ProjectState): ProjectState {
   return { ...state, version: PROJECT_STATE_VERSION, nodes: migratedNodes };
 }
 
+function migrateV2toV3(state: ProjectState): ProjectState {
+  const defaults = NODE_DEFAULTS['custom-instrument-node'];
+  const migratedNodes = state.nodes.map((node) => {
+    if (node.type !== 'custom-instrument-node') return node;
+    const data = (node.data || {}) as Record<string, unknown>;
+    return {
+      ...node,
+      data: {
+        ...data,
+        code: data.code ?? defaults.code,
+        paramValues: data.paramValues ?? defaults.paramValues,
+      },
+    };
+  });
+  return { ...state, version: PROJECT_STATE_VERSION, nodes: migratedNodes };
+}
+
+function migrateV3toV4(state: ProjectState): ProjectState {
+  const defaults = NODE_DEFAULTS['custom-instrument-node'];
+  const migratedNodes = state.nodes.map((node) => {
+    if (node.type !== 'custom-node') return node;
+    const data = (node.data || {}) as Record<string, unknown>;
+    const { customPattern, ...rest } = data;
+    return {
+      ...node,
+      type: 'custom-instrument-node',
+      data: {
+        ...rest,
+        code: customPattern ?? defaults.code,
+        paramValues: {},
+      },
+    };
+  });
+  return { ...state, version: PROJECT_STATE_VERSION, nodes: migratedNodes };
+}
+
 function migrate(state: ProjectState): ProjectState {
   const version = state.version ?? 1;
   let current = state;
   if (version < 2) current = migrateV1toV2(current);
+  if (version < 3) current = migrateV2toV3(current);
+  if (version < 4) current = migrateV3toV4(current);
   current.version = PROJECT_STATE_VERSION;
   return current;
 }

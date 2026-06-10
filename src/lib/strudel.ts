@@ -3,6 +3,7 @@ import { AppNode, nodesConfig } from '@/components/nodes';
 import { findConnectedComponents } from './graph-utils';
 import { logger } from './logger';
 import { getNodeOutput } from './node-outputs';
+import { isCustomInstrumentEffect } from './custom-instrument';
 
 export function getNodeStrudelOutput(nodeType: string) {
   return getNodeOutput(nodeType);
@@ -25,6 +26,12 @@ function optimizeSoundCalls(strudelString: string): string {
   return optimized;
 }
 function isSoundSource(node: AppNode): boolean {
+  if (node.type === 'custom-instrument-node') {
+    const role = node.data.role;
+    if (role === 'instrument') return true;
+    if (role === 'effect') return false;
+    return !isCustomInstrumentEffect(node.data.code);
+  }
   const category = nodesConfig[node.type]?.category;
   return category === 'Instruments';
 }

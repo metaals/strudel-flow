@@ -4,7 +4,7 @@ import { AppNode } from '@/components/nodes';
 
 function makeInstrumentNode(
   id: string,
-  type: 'pad-node' | 'custom-node' = 'custom-node',
+  type: 'pad-node' | 'custom-instrument-node' = 'custom-instrument-node',
   data: Record<string, unknown> = {}
 ): AppNode {
   return {
@@ -14,7 +14,8 @@ function makeInstrumentNode(
     data: {
       title: 'Test',
       state: 'running',
-      customPattern: 'sound("bd sd")',
+      code: 'sound("bd sd")',
+      paramValues: {},
       ...data,
     },
   } as AppNode;
@@ -66,7 +67,7 @@ describe('generateOutput', () => {
 
   it('comments out patterns when all sources are paused', () => {
     const nodes = [
-      makeInstrumentNode('i1', 'custom-node', { state: 'paused' }),
+      makeInstrumentNode('i1', 'custom-instrument-node', { state: 'paused' }),
     ];
     const result = generateOutput(nodes, [], '120', '4');
     expect(result).toContain('// $:');
@@ -77,6 +78,34 @@ describe('generateOutput', () => {
     const result = generateOutput(nodes, [], '120', '4');
     const lines = result.split('\n').filter((l) => l.startsWith('$:'));
     expect(lines).toHaveLength(2);
+  });
+
+  it('treats a custom node with an effect body as an effect, not a source', () => {
+    const nodes = [
+      makeInstrumentNode('i1'),
+      makeInstrumentNode('e1', 'custom-instrument-node', {
+        code: '.gain(0.5)',
+      }),
+    ];
+    const edges = [makeEdge('i1', 'e1')];
+    const result = generateOutput(nodes, edges, '120', '4');
+    const lines = result.split('\n').filter((l) => l.startsWith('$:'));
+    expect(lines).toHaveLength(1);
+    expect(result).toContain('.gain(0.5)');
+  });
+
+  it('honors an explicit role:effect override on a non-dot body', () => {
+    const nodes = [
+      makeInstrumentNode('i1'),
+      makeInstrumentNode('e1', 'custom-instrument-node', {
+        code: 'sound("hh")',
+        role: 'effect',
+      }),
+    ];
+    const edges = [makeEdge('i1', 'e1')];
+    const result = generateOutput(nodes, edges, '120', '4');
+    const lines = result.split('\n').filter((l) => l.startsWith('$:'));
+    expect(lines).toHaveLength(1);
   });
 });
 

@@ -1,4 +1,5 @@
 import type { AppNode } from '@/components/nodes/types';
+import { parseCustomInstrument, substitute } from '@/lib/custom-instrument';
 
 const NOTES = ['0', '1', '2', '3', '4', '5', '6', '7'];
 
@@ -120,10 +121,15 @@ export function chordOutput(node: AppNode, strudelString: string): string {
   return strudelString ? `${strudelString}.n("${notePattern}").scale("${scale}")` : `n("${notePattern}").scale("${scale}")`;
 }
 
-export function customOutput(node: AppNode, strudelString: string): string {
+export function customInstrumentOutput(node: AppNode, strudelString: string): string {
   const { data } = node;
-  const pattern = data.customPattern || 'c3';
-  return strudelString ? `${strudelString}.stack("${pattern}")` : `"${pattern}"`;
+  const { params, body } = parseCustomInstrument(data.code || '');
+  const rendered = substitute(body, params, data.paramValues || {}).trim();
+  if (!rendered) return strudelString;
+  if (rendered.startsWith('.')) {
+    return strudelString ? `${strudelString}${rendered}` : rendered.slice(1);
+  }
+  return strudelString ? `${strudelString}.stack(${rendered})` : rendered;
 }
 
 export function polyrhythmOutput(node: AppNode, strudelString: string): string {

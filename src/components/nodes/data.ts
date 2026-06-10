@@ -61,8 +61,11 @@ export interface BeatMachineNodeData extends BaseNodeData {
   modifiersEnabled?: boolean;
 }
 
-export interface CustomNodeData extends BaseNodeData {
-  customPattern?: string;
+export interface CustomInstrumentNodeData extends BaseNodeData {
+  code?: string;
+  templateId?: string;
+  role?: 'instrument' | 'effect';
+  paramValues?: Record<string, number | string | boolean>;
 }
 
 // Synths
@@ -116,7 +119,10 @@ export interface WorkflowNodeData extends BaseNodeData {
   pattern1Active?: boolean;
   pattern2Active?: boolean;
   pattern3Active?: boolean;
-  customPattern?: string;
+  code?: string;
+  templateId?: string;
+  role?: 'instrument' | 'effect';
+  paramValues?: Record<string, number | string | boolean>;
   scaleType?: 'major' | 'minor';
   chordComplexity?: 'triad' | 'seventh' | 'ninth' | 'eleventh';
   pressedKeys?: number[];
@@ -161,7 +167,7 @@ export type AppNodeType =
   | 'chord-node'
   | 'polyrhythm-node'
   | 'beat-machine-node'
-  | 'custom-node'
+  | 'custom-instrument-node'
   | 'drum-sounds-node'
   | 'synth-select-node'
   | 'gain-node'
@@ -189,7 +195,10 @@ export const NODE_DEFAULTS: Record<AppNodeType, Partial<WorkflowNodeData>> = {
   'chord-node': { selectedKey: 'C', selectedScaleType: 'major', octave: 4, scaleType: 'major', chordComplexity: 'triad', pressedKeys: [] },
   'polyrhythm-node': { polyPattern1: 'x*4', polyPattern2: 'x*3', polyPattern3: 'x*5', polySound1: 'bd', polySound2: 'sd', polySound3: 'hh', pattern1Active: true, pattern2Active: true, pattern3Active: false },
   'beat-machine-node': { rows: [], modifiersEnabled: false },
-  'custom-node': { customPattern: 'c3' },
+  'custom-instrument-node': {
+    code: '@param GAIN: dial(0..1) = 0.8\n@param INST: dropdown(bd, sd, hh) = bd\n@param REPEAT: stepper(1..8) = 2\n---\nsound("$INST*$REPEAT").gain($GAIN)',
+    paramValues: {},
+  },
   'drum-sounds-node': {},
   'synth-select-node': {},
   'gain-node': { gain: '1' },

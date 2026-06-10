@@ -5,7 +5,7 @@ import {
   useRef,
   ChangeEvent,
 } from 'react';
-import { Command, GripVertical, Plus, Save, Upload } from 'lucide-react';
+import { Command, GripVertical, Plus, Save, Upload, X } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 
 import {
@@ -36,6 +36,12 @@ import { useShallow } from 'zustand/react/shallow';
 import { type AppStore } from '@/store/app-store';
 import { downloadState, stateFromJson } from '@/lib/project-state';
 import { useStrudelStore } from '@/store/strudel-store';
+import {
+  useSavedNodesStore,
+  type SavedNode,
+} from '@/store/saved-nodes-store';
+import { NODE_DEFAULTS } from '@/components/nodes/data';
+import type { WorkflowNodeData } from '@/components/nodes/types';
 
 export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -120,6 +126,32 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
     return acc;
   }, {} as Record<string, NodeConfigEntry[]>);
 
+  const savedNodes = useSavedNodesStore((s) => s.savedNodes);
+  const removeSavedNode = useSavedNodesStore((s) => s.remove);
+  const savedInstruments = savedNodes.filter((n) => n.kind === 'instrument');
+  const savedEffects = savedNodes.filter((n) => n.kind === 'effect');
+
+  const renderSavedItem = (saved: SavedNode) => (
+    <DraggableItem
+      key={saved.id}
+      id={'custom-instrument-node'}
+      title={saved.label}
+      category={saved.kind === 'effect' ? 'Audio Effects' : 'Instruments'}
+      icon={saved.icon ?? 'Code'}
+      dragData={{
+        ...NODE_DEFAULTS['custom-instrument-node'],
+        code: saved.code,
+        templateId: saved.id,
+        title: saved.label,
+        icon: saved.icon ?? 'Code',
+        paramValues: {},
+        role: saved.kind,
+        state: 'running',
+      }}
+      onRemove={() => removeSavedNode(saved.id)}
+    />
+  );
+
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader className="py-0">
@@ -145,6 +177,30 @@ export function AppSidebar(props: ComponentProps<typeof Sidebar>) {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+
+        {savedInstruments.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs font-medium text-muted-foreground capitalize">
+              My Instruments
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {savedInstruments.map(renderSavedItem)}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {savedEffects.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs font-medium text-muted-foreground capitalize">
+              My Effects
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>{savedEffects.map(renderSavedItem)}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
@@ -197,29 +253,39 @@ const selector = (state: AppStore) => ({
   addNode: state.addNode,
 });
 
-function DraggableItem(props: NodeConfigEntry) {
+function DraggableItem(
+  props: NodeConfigEntry & {
+    dragData?: WorkflowNodeData;
+    onRemove?: () => void;
+  }
+) {
+  const { dragData, onRemove, ...nodeProps } = props;
   const { screenToFlowPosition } = useReactFlow();
   const { addNode } = useAppStore(useShallow(selector));
   const [isDragging, setIsDragging] = useState(false);
 
   const onClick = useCallback(() => {
     const newNode: AppNode = createNodeByType({
-      type: props.id as AppNodeType,
+      type: nodeProps.id as AppNodeType,
       position: screenToFlowPosition({
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
       }),
+      data: dragData,
     });
 
     addNode(newNode);
-  }, [props, addNode, screenToFlowPosition]);
+  }, [nodeProps, dragData, addNode, screenToFlowPosition]);
 
   const onDragStart = useCallback(
     (e: React.DragEvent) => {
-      e.dataTransfer.setData('application/reactflow', JSON.stringify(props));
+      e.dataTransfer.setData(
+        'application/reactflow',
+        JSON.stringify({ ...nodeProps, data: dragData })
+      );
       setIsDragging(true);
     },
-    [props]
+    [nodeProps, dragData]
   );
 
   const lastDragPos = useRef({ x: 0, y: 0 });
@@ -236,7 +302,7 @@ function DraggableItem(props: NodeConfigEntry) {
     setIsDragging(false);
   }
 
-  const IconComponent = props?.icon ? iconMapping[props.icon] : undefined;
+  const IconComponent = nodeProps?.icon ? iconMapping[nodeProps.icon] : undefined;
 
   return (
     <SidebarMenuItem
@@ -249,7 +315,7 @@ function DraggableItem(props: NodeConfigEntry) {
       onDragEnd={onDragEnd}
       onClick={onClick}
       draggable
-      key={props.title}
+      key={nodeProps.title}
     >
       {isDragging && (
         <span
@@ -260,9 +326,23 @@ function DraggableItem(props: NodeConfigEntry) {
         </span>
       )}
       <SidebarMenuButton className="bg-card cursor-grab active:cursor-grabbing">
-        {IconComponent ? <IconComponent aria-label={props?.icon} /> : null}
-        <span>{props.title}</span>
-        <GripVertical className="ml-auto" />
+        {IconComponent ? <IconComponent aria-label={nodeProps?.icon} /> : null}
+        <span>{nodeProps.title}</span>
+        {onRemove ? (
+          <button
+            type="button"
+            aria-label="Remove instrument"
+            className="ml-auto rounded-sm p-0.5 hover:bg-accent"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+          >
+            <X className="size-4" />
+          </button>
+        ) : (
+          <GripVertical className="ml-auto" />
+        )}
       </SidebarMenuButton>
     </SidebarMenuItem>
   );

@@ -3,7 +3,7 @@ import { iconMapping } from '@/data/icon-mapping';
 import { padNodeDef } from './instruments/pad-node';
 import { arpeggiatorNodeDef } from './instruments/arpeggiator-node';
 import { chordNodeDef } from './instruments/chord-node';
-import { customNodeDef } from './instruments/custom-node';
+import { customInstrumentNodeDef } from './instruments/custom-instrument-node';
 import { polyrhythmNodeDef } from './instruments/polyrhythm-node';
 import { beatMachineNodeDef } from './instruments/beat-machine-node';
 
@@ -56,7 +56,7 @@ const allNodeDefs: NodeDefinition[] = [
   chordNodeDef,
   polyrhythmNodeDef,
   beatMachineNodeDef,
-  customNodeDef,
+  customInstrumentNodeDef,
   drumSoundsNodeDef,
   synthSelectNodeDef,
   lpfNodeDef,

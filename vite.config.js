@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'url';
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
+  base: '/strudel-flow/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

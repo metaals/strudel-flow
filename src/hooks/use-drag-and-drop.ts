@@ -29,6 +29,7 @@ export function useDragAndDrop() {
       const newNode: AppNode = createNodeByType({
         type: nodeProps.id,
         position,
+        data: nodeProps.data,
       });
       addNode(newNode);
     },

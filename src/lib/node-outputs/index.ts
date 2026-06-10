@@ -1,5 +1,5 @@
 import type { NodeOutputFn } from '@/components/nodes/registry';
-import { padOutput, arpeggiatorOutput, chordOutput, customOutput, polyrhythmOutput, beatMachineOutput } from './instruments';
+import { padOutput, arpeggiatorOutput, chordOutput, customInstrumentOutput, polyrhythmOutput, beatMachineOutput } from './instruments';
 import { drumSoundsOutput, synthSelectOutput } from './synths';
 import { gainOutput, lpfOutput, distortOutput, panOutput, fastOutput, slowOutput, crushOutput, postgainOutput, fmOutput, juxOutput, revOutput, palindromeOutput, phaserOutput, roomOutput, adsrOutput, maskOutput, plyOutput, lateOutput } from './effects';
 
@@ -7,7 +7,7 @@ export const nodeOutputMap: Record<string, NodeOutputFn> = {
   'pad-node': padOutput,
   'arpeggiator-node': arpeggiatorOutput,
   'chord-node': chordOutput,
-  'custom-node': customOutput,
+  'custom-instrument-node': customInstrumentOutput,
   'polyrhythm-node': polyrhythmOutput,
   'beat-machine-node': beatMachineOutput,
   'drum-sounds-node': drumSoundsOutput,
